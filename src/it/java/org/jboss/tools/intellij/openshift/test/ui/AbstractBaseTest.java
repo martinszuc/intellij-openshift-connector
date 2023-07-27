@@ -32,17 +32,24 @@ import java.time.Duration;
 abstract public class AbstractBaseTest {
 
     protected static RemoteRobot robot;
+    private static boolean isTestIDERunning = false;
 
     @BeforeAll
     public static void connect() {
-        robot = IdeaRunner.getInstance().getRemoteRobot();
-        ProjectUtility.createEmptyProject(robot, "test-project");
-        ProjectUtility.closeTipDialogIfItAppears(robot);
-        ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-        ProjectUtility.closeGotItPopup(robot);
+        // Check if the test IDE is already running. If not, connect to it and set the flag to true
+        if (!isTestIDERunning) {
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            ProjectUtility.createEmptyProject(robot, "test-project");
+            ProjectUtility.closeTipDialogIfItAppears(robot);
+            ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+            ProjectUtility.closeGotItPopup(robot);
+            isTestIDERunning = true;
+        }
+
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
     }
+
 
     public RemoteRobot getRobotReference() {
         return robot;

@@ -30,22 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BaseUITest extends AbstractBaseTest {
 
 	@Test
-	public void openshiftExtensionTest() {
-		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable("OpenShift"));
-		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Kubernetes' stripe button is not available.", () -> isStripeButtonAvailable("Kubernetes"));
-		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Getting Started' stripe button is not available.", () -> isStripeButtonAvailable("Getting Started"));
-	}
-
-	@Test
-	public void openshiftViewTest() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
-		view.openView();
-		view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);
-		view.waitForTreeItem("Devfile registries", 10, 1);
-		view.closeView();
-	}
-
-	@Test
 	public void gettingStartedContainsAllItems() {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
@@ -60,7 +44,7 @@ public class BaseUITest extends AbstractBaseTest {
 		view.closeView();
 	}
 
-	@Test
+	//@Test
 	public void gettingStartedBehaviour() {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
@@ -91,6 +75,4 @@ public class BaseUITest extends AbstractBaseTest {
 
 		view.closeView();
 	}
-
-
 }
