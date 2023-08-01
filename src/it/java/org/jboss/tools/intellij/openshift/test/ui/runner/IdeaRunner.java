@@ -26,16 +26,16 @@ public class IdeaRunner {
 	private static int port = 8580;
 
 	private RemoteRobot robot;
-	
+
 	private IdeaRunner() {}
-	
+
 	public static IdeaRunner getInstance() {
 		if (ideaRunner == null) {
 			ideaRunner = new IdeaRunner();
 		}
 		return ideaRunner;
 	}
-	
+
 	public void startIDE(IntelliJVersion ideaVersion, int portNumber) {
 		if (!ideaIsStarted) {
 			System.out.println("Starting IDE, setting ideaIsStarted to true");
@@ -46,8 +46,26 @@ public class IdeaRunner {
 		}
 	}
 
+	public void stopIDE() {
+		if (ideaIsStarted) {
+			System.out.println("Stopping IDE, setting ideaIsStarted to false");
+			UITestRunner.closeIde();
+			ideaIsStarted = false;
+		}
+	}
+
+	public void restartIDE(IntelliJVersion ideaVersion, int portNumber) {
+		stopIDE();
+		//here we need to wait
+		startIDE(ideaVersion, portNumber);
+	}
+
 	public RemoteRobot getRemoteRobot() {
 		return robot;
+	}
+
+	public boolean getIdeaIsStarted() {
+		return ideaIsStarted;
 	}
 
 }

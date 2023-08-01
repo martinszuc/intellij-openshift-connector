@@ -15,14 +15,20 @@ import com.intellij.remoterobot.fixtures.JButtonFixture;
 import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.Keyboard;
+import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
+import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.Test;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.time.Duration;
 import java.util.List;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -91,6 +97,57 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         view.closeView();
     }
 
+    @Test
+    public void restartIDE() {
+        // Assert that the test IDE is running
+        assertTrue(IdeaRunner.getInstance().getIdeaIsStarted());
+
+        // Restart the test IDE
+        restartTestIDE(IntelliJVersion.ULTIMATE_V_2021_2, 8580);
+
+        // Assert that the test IDE is running again
+        assertTrue(IdeaRunner.getInstance().getIdeaIsStarted());
+    }
+
+    //@Test
+    public void pasteLoginCommandTest() {
+        OpenshiftView view = robot.find(OpenshiftView.class);
+        openClusterLoginDialog(view);
+
+        // Locate the fields by default node
+        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='https://kubernetes.default.svc/']"));
+        JTextFieldFixture usernameField = robot.find(JTextFieldFixture.class, byXpath("//div[@text='Username:']/following-sibling::div[@class='JTextField']"));
+        List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
+        JTextFieldFixture passwordField = passwordFields.get(1);
+
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        //TODO paste command pastes url and token
+        //oc login --token=sha256~i7-K7krCd8Y58zOBIs0Tph8sDa86OQxmPJ0msap6l6A --server=https://api.ocp2.adapters-crs.ccitredhat.com:6443
+
+
+        // Set the contents of the clipboard
+        String text = "oc login --token=sha256~i7-K7krCd8Y58zOBIs0Tph8sDa86OQxmPJ0msap6l6A --server=https://api.ocp2.adapters-crs.ccitredhat.com:6443";
+        StringSelection selection = new StringSelection(text);
+        clipboard.setContents(selection, null);
+
+        // Assert that the URL, username, and password fields are empty
+        assertTrue(usernameField.getText().isEmpty());
+        assertTrue(passwordField.getText().isEmpty());
+
+        // Locate the "Paste Login Command" button and click on it
+        JButtonFixture pasteLoginCommandButton = robot.find(JButtonFixture.class, byXpath("//div[@text='Paste Login Command']"));
+        pasteLoginCommandButton.click();
+
+        // Assert that the URL, username, and password fields contain the text "sample-text"
+        assertEquals("https://sample-text:6443", urlField.getText());
+        assertEquals("sample-text", usernameField.getText());
+        assertEquals("sample-text", passwordField.getText());
+
+        closeClusterLoginDialog();
+        view.closeView();
+    }
+
 
     @Test
     public void usernameLoginToClusterTest() {
@@ -98,20 +155,20 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         openClusterLoginDialog(view);
 
         // Locate the Cluster URL JTextField by default node
-        JTextFieldFixture textField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='https://kubernetes.default.svc/']"));
-        textField.click();
-        textField.setText("https://api.ocp2.adapters-crs.ccitredhat.com:6443");
+        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='https://kubernetes.default.svc/']"));
+        urlField.click();
+        urlField.setText("https://api.ocp2.adapters-crs.ccitredhat.com:6443");
 
         // Locate the username JTextField
         JTextFieldFixture usernameField = robot.find(JTextFieldFixture.class, byXpath("//div[@text='Username:']/following-sibling::div[@class='JTextField']"));
         usernameField.click();
-        usernameField.setText("developer");
+        usernameField.setText("sample");
 
         // Locate all JPasswordField objects
         List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
         JTextFieldFixture passwordField = passwordFields.get(1);
         passwordField.click();
-        passwordField.setText("developer");
+        passwordField.setText("sample");
 
         // Locate the OK button and click on it
         JButtonFixture okButton = robot.find(JButtonFixture.class, byXpath("//div[@visible_text='OK']"));

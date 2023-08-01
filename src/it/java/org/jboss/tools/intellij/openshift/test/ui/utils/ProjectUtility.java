@@ -77,6 +77,29 @@ public class ProjectUtility {
         }
     }
 
+    public static void openExistingProject(RemoteRobot robot, String projectName) {
+        // Find the FlatWelcomeFrame
+        final FlatWelcomeFrame flatWelcomeFrame = robot.find(FlatWelcomeFrame.class);
+
+        // Click on the 'Open' button
+        flatWelcomeFrame.findText("Open").click();
+
+        // Find the 'Select Path' dialog
+        ComponentFixture selectPathDialog = robot.find(ComponentFixture.class, byXpath("//div[@accessiblename='Select Path' and @class='MyDialog']"));
+
+        // Find the text field and enter the project path
+//        JTextFieldFixture textField = selectPathDialog.find(JTextFieldFixture.class, byXpath("//div[@class='JTextField']"));
+//        textField.setText(projectName);
+
+        // Click on the 'OK' button
+        selectPathDialog.findText("OK").click();
+
+        // Wait for the project to open
+        final IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
+        ideStatusBar.waitUntilProjectImportIsComplete();
+    }
+
+
     public static void sleep(long ms) {
         System.out.println("Putting thread into sleep for: " + ms + " ms");
         try {

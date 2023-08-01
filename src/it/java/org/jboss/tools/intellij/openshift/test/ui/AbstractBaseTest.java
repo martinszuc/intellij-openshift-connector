@@ -14,6 +14,7 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
+import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
@@ -32,24 +33,39 @@ import java.time.Duration;
 abstract public class AbstractBaseTest {
 
     protected static RemoteRobot robot;
-    private static boolean isTestIDERunning = false;
+    private static boolean isConnected = false;
 
     @BeforeAll
     public static void connect() {
-        // Check if the test IDE is already running. If not, connect to it and set the flag to true
-        if (!isTestIDERunning) {
+        // Check if the test is already connected to the test IDE. If not, connect to it and set the flag to true
+        if (!isConnected) {
             robot = IdeaRunner.getInstance().getRemoteRobot();
             ProjectUtility.createEmptyProject(robot, "test-project");
             ProjectUtility.closeTipDialogIfItAppears(robot);
             ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
             ProjectUtility.closeGotItPopup(robot);
-            isTestIDERunning = true;
+            isConnected = true;
         }
 
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
     }
 
+    protected static void restartTestIDE(IntelliJVersion ideaVersion, int portNumber) {
+        // Restart the test IDE
+        IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
+
+        // Reconnect to the test IDE
+        robot = IdeaRunner.getInstance().getRemoteRobot();
+        ProjectUtility.openExistingProject(robot, "test-project");
+        ProjectUtility.closeTipDialogIfItAppears(robot);
+        ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+        ProjectUtility.closeGotItPopup(robot);
+        isConnected = true;
+
+        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
+        ideStatusBar.waitUntilAllBgTasksFinish();
+    }
 
     public RemoteRobot getRobotReference() {
         return robot;
