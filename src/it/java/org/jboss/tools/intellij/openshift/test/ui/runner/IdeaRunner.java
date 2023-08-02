@@ -40,7 +40,7 @@ public class IdeaRunner {
 		if (!ideaIsStarted) {
 			System.out.println("Starting IDE, setting ideaIsStarted to true");
 			robot = UITestRunner.runIde(ideaVersion, port);
-			port = portNumber;
+			port = portNumber; //TODO ask about order
 			System.out.println("IDEA port for remote robot: " + port);
 			ideaIsStarted = true;
 		}
@@ -60,12 +60,15 @@ public class IdeaRunner {
 		startIDE(ideaVersion, portNumber);
 	}
 
+	public boolean getIdeaIsStarted() {
+		//TODO maybe check if its started for real
+		return ideaIsStarted;
+	}
+
 	public RemoteRobot getRemoteRobot() {
 		return robot;
 	}
 
-	public boolean getIdeaIsStarted() {
-		return ideaIsStarted;
-	}
+
 
 }

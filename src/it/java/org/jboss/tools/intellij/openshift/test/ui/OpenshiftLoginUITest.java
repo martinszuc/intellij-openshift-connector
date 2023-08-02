@@ -99,13 +99,8 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
 
     @Test
     public void restartIDE() {
-        // Assert that the test IDE is running
         assertTrue(IdeaRunner.getInstance().getIdeaIsStarted());
-
-        // Restart the test IDE
-        restartTestIDE(IntelliJVersion.ULTIMATE_V_2021_2, 8580);
-
-        // Assert that the test IDE is running again
+        restartTestIDE(IntelliJVersion.ULTIMATE_V_2021_2, 8580); //TODO this test needs some work
         assertTrue(IdeaRunner.getInstance().getIdeaIsStarted());
     }
 

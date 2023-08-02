@@ -33,18 +33,18 @@ import java.time.Duration;
 abstract public class AbstractBaseTest {
 
     protected static RemoteRobot robot;
-    private static boolean isConnected = false;
+    private static boolean isRobotConnected = false;
 
     @BeforeAll
     public static void connect() {
         // Check if the test is already connected to the test IDE. If not, connect to it and set the flag to true
-        if (!isConnected) {
+        if (!isRobotConnected) {
             robot = IdeaRunner.getInstance().getRemoteRobot();
             ProjectUtility.createEmptyProject(robot, "test-project");
             ProjectUtility.closeTipDialogIfItAppears(robot);
             ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
             ProjectUtility.closeGotItPopup(robot);
-            isConnected = true;
+            isRobotConnected = true;
         }
 
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
@@ -57,11 +57,11 @@ abstract public class AbstractBaseTest {
 
         // Reconnect to the test IDE
         robot = IdeaRunner.getInstance().getRemoteRobot();
-        ProjectUtility.openExistingProject(robot, "test-project");
-        ProjectUtility.closeTipDialogIfItAppears(robot);
-        ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-        ProjectUtility.closeGotItPopup(robot);
-        isConnected = true;
+        //ProjectUtility.openExistingProject(robot, "test-project");    //TODO I believe these are redundant (not sure)
+        //ProjectUtility.closeTipDialogIfItAppears(robot);
+        //ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+        //ProjectUtility.closeGotItPopup(robot);
+        isRobotConnected = true;
 
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
