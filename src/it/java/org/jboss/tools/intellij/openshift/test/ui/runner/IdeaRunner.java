@@ -11,8 +11,28 @@
 package org.jboss.tools.intellij.openshift.test.ui.runner;
 
 import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.stepsProcessing.StepLogger;
+import com.intellij.remoterobot.stepsProcessing.StepWorker;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.UITestRunner;
+import com.redhat.devtools.intellij.commonuitest.exceptions.UITestException;
+import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFrame;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.MainIdeWindow;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
+import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 
 /**
  * Idea Runner singleton to keep track of running IDE
@@ -54,10 +74,8 @@ public class IdeaRunner {
 		}
 	}
 
-	public void restartIDE(IntelliJVersion ideaVersion, int portNumber) {
-		stopIDE();
-		//here we need to wait
-		startIDE(ideaVersion, portNumber);
+	public RemoteRobot restartIDE(IntelliJVersion ideaVersion, int portNumber) {
+		return UITestRunner.restartIde(ideaVersion,portNumber);
 	}
 
 	public boolean getIdeaIsStarted() {
@@ -72,3 +90,4 @@ public class IdeaRunner {
 
 
 }
+

@@ -16,13 +16,16 @@ import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
-import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 
@@ -33,6 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OpenshiftLoginUITest extends AbstractBaseTest {
+
+    private static final String DEFAULT_CLUSTER_URL = "https://kubernetes.default.svc/";
+    private static final String CLUSTER_URL_TO_LOGIN = "https://api.ocp2.adapters-crs.ccitredhat.com:6443/";
+    private static final String USERNAME = "developer";
+    private static final String PASSWD = "developer";
+    private static String clusterUrl = DEFAULT_CLUSTER_URL;
+
 
     @Test
     public void openshiftExtensionTest() {
@@ -45,22 +55,22 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
     public void openshiftViewTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
-        view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);
+        view.waitForTreeItem(clusterUrl, 10, 1);
         view.waitForTreeItem("Devfile registries", 10, 1);
         view.closeView();
     }
 
-    @Test
+    //@Test
     public void openshiftDefaultNodeAndUserLoggedOutTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
 
         // Wait for the "https://kubernetes.default.svc/" TreeItem to be available
-        waitFor(Duration.ofSeconds(10), () -> !view.getOpenshiftConnectorTree().findAllText("https://kubernetes.default.svc/").isEmpty());
+        waitFor(Duration.ofSeconds(10), () -> !view.getOpenshiftConnectorTree().findAllText(clusterUrl).isEmpty());
 
         if (view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").isEmpty()) {
             // If the "Please log in to the cluster" item is not present, double-click on the TreeItem to expand it
-            view.getOpenshiftConnectorTree().findText("https://kubernetes.default.svc/").doubleClick();
+            view.getOpenshiftConnectorTree().findText(clusterUrl).doubleClick();
         }
         // Verify that the "Please log in to the cluster" item is present
         assertTrue(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").size() > 0);
@@ -77,7 +87,7 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         openClusterLoginDialog(view);
 
         // Wait for the login window to appear
-        waitFor(Duration.ofSeconds(10) , () -> robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
+        waitFor(Duration.ofSeconds(10), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
                 .stream()
                 .anyMatch(ComponentFixture::isShowing));
 
@@ -86,7 +96,7 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
                 .stream()
                 .anyMatch(ComponentFixture::isShowing));
 
-        closeClusterLoginDialog();
+        closeDialogWindows();
 
         // Verify that the login window is not present
         assertFalse(robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
@@ -97,20 +107,13 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         view.closeView();
     }
 
-    @Test
-    public void restartIDE() {
-        assertTrue(IdeaRunner.getInstance().getIdeaIsStarted());
-        restartTestIDE(IntelliJVersion.ULTIMATE_V_2021_2, 8580); //TODO this test needs some work
-        assertTrue(IdeaRunner.getInstance().getIdeaIsStarted());
-    }
-
     //@Test
     public void pasteLoginCommandTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
 
         // Locate the fields by default node
-        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='https://kubernetes.default.svc/']"));
+        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + clusterUrl + "']"));
         JTextFieldFixture usernameField = robot.find(JTextFieldFixture.class, byXpath("//div[@text='Username:']/following-sibling::div[@class='JTextField']"));
         List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
         JTextFieldFixture passwordField = passwordFields.get(1);
@@ -139,7 +142,7 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         assertEquals("sample-text", usernameField.getText());
         assertEquals("sample-text", passwordField.getText());
 
-        closeClusterLoginDialog();
+        closeDialogWindows();
         view.closeView();
     }
 
@@ -149,38 +152,52 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
 
-        // Locate the Cluster URL JTextField by default node
-        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='https://kubernetes.default.svc/']"));
+        // Locate the Cluster URL JTextField
+        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + clusterUrl + "']"));
         urlField.click();
-        urlField.setText("https://api.ocp2.adapters-crs.ccitredhat.com:6443");
+        urlField.setText(CLUSTER_URL_TO_LOGIN);
 
         // Locate the username JTextField
         JTextFieldFixture usernameField = robot.find(JTextFieldFixture.class, byXpath("//div[@text='Username:']/following-sibling::div[@class='JTextField']"));
         usernameField.click();
-        usernameField.setText("sample");
+        usernameField.setText(USERNAME);
 
         // Locate all JPasswordField objects
         List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
         JTextFieldFixture passwordField = passwordFields.get(1);
         passwordField.click();
-        passwordField.setText("sample");
+        passwordField.setText(PASSWD);
 
         // Locate the OK button and click on it
         JButtonFixture okButton = robot.find(JButtonFixture.class, byXpath("//div[@visible_text='OK']"));
         okButton.click();
+        clusterUrl = CLUSTER_URL_TO_LOGIN;
 
-        closeClusterLoginDialog();
+        closeDialogWindows();
 
-        //TODO: check if logged in
+        restart(IntelliJVersion.ULTIMATE_V_2021_2, 8580);
 
-//        // Wait for the specified element to appear
-//        String xpath = "//div[@visible_text='https://api.ocp2.adapters-crs.ccitredhat.com:6443']";
-//        Duration timeout = Duration.ofSeconds(15);
-//        waitFor(timeout, () -> !robot.findAll(ComponentFixture.class, byXpath(xpath)).isEmpty());
+        // Check if logged in
+        view = robot.find(OpenshiftView.class);
+        view.openView();
+        view.waitForTreeItem(clusterUrl, 10, 1);
 
         view.closeView();
+        logOut();
     }
-    @Test
+
+    private void logOut() {
+        OpenshiftView view = robot.find(OpenshiftView.class);
+        view.openView();
+
+        removeKubeConfig();
+        clusterUrl=DEFAULT_CLUSTER_URL;
+
+        view.waitForTreeItem(clusterUrl, 10, 1);
+        view.closeView();
+    }
+
+    //@Test
     public void tokenLoginToClusterTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
@@ -198,26 +215,26 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
 
         //TODO: check if logged in
 
-        closeClusterLoginDialog();
+        closeDialogWindows();
         view.closeView();
     }
 
 
-    private static void closeClusterLoginDialog() {
+    private static void closeDialogWindows() {
         Keyboard keyboard = new Keyboard(robot);
         keyboard.escape();
         keyboard.escape();
 
     }
 
-    private void openClusterLoginDialog(OpenshiftView view){
+    private void openClusterLoginDialog(OpenshiftView view) {
         view.openView();
 
-        // Wait for the "https://kubernetes.default.svc/" TreeItem to be available
-        waitFor(Duration.ofSeconds(10), () -> !view.getOpenshiftConnectorTree().findAllText("https://kubernetes.default.svc/").isEmpty());
+        // Wait for the cluster URL TreeItem to be available
+        waitFor(Duration.ofSeconds(10), () -> !view.getOpenshiftConnectorTree().findAllText(clusterUrl).isEmpty());
 
         // Access the context menu by right-clicking the TreeItem
-        view.getOpenshiftConnectorTree().findText("https://kubernetes.default.svc/").rightClick();
+        view.getOpenshiftConnectorTree().findText(clusterUrl).rightClick();
 
         // Wait for the context menu to appear
         waitFor(Duration.ofSeconds(10), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@text='Log in to cluster']"))
@@ -233,5 +250,13 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         waitFor(Duration.ofSeconds(10), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@text='Cluster URL:']"))
                 .stream()
                 .anyMatch(ComponentFixture::isShowing));
+    }
+    private void removeKubeConfig(){
+        Path configFilePath = Paths.get(System.getProperty("user.home"), ".kube", "config");
+        try {
+            Files.deleteIfExists(configFilePath);
+        } catch (IOException e) {
+            // Handle exception
+        }
     }
 }

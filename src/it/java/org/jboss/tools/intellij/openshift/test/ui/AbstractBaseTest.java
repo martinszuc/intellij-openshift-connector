@@ -12,6 +12,7 @@ package org.jboss.tools.intellij.openshift.test.ui;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
+import com.redhat.devtools.intellij.commonuitest.UITestRunner;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
+
+import static org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner.getInstance;
 
 /**
  * @author Ondrej Dockal, odockal@redhat.com
@@ -39,7 +42,7 @@ abstract public class AbstractBaseTest {
     public static void connect() {
         // Check if the test is already connected to the test IDE. If not, connect to it and set the flag to true
         if (!isRobotConnected) {
-            robot = IdeaRunner.getInstance().getRemoteRobot();
+            robot = getInstance().getRemoteRobot();
             ProjectUtility.createEmptyProject(robot, "test-project");
             ProjectUtility.closeTipDialogIfItAppears(robot);
             ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
@@ -51,16 +54,14 @@ abstract public class AbstractBaseTest {
         ideStatusBar.waitUntilAllBgTasksFinish();
     }
 
-    protected static void restartTestIDE(IntelliJVersion ideaVersion, int portNumber) {
+    protected static void restart(IntelliJVersion ideaVersion, int portNumber) {
         // Restart the test IDE
-        IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
+        robot = IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
 
-        // Reconnect to the test IDE
-        robot = IdeaRunner.getInstance().getRemoteRobot();
-        //ProjectUtility.openExistingProject(robot, "test-project");    //TODO I believe these are redundant (not sure)
-        //ProjectUtility.closeTipDialogIfItAppears(robot);
+        ProjectUtility.closeTipDialogIfItAppears(robot);
         //ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
         //ProjectUtility.closeGotItPopup(robot);
+
         isRobotConnected = true;
 
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
