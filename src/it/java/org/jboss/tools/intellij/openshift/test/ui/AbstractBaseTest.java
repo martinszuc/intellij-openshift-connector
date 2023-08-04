@@ -57,12 +57,9 @@ abstract public class AbstractBaseTest {
     protected static void restart(IntelliJVersion ideaVersion, int portNumber) {
         // Restart the test IDE
         robot = IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
+        isRobotConnected = true;
 
         ProjectUtility.closeTipDialogIfItAppears(robot);
-        //ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-        //ProjectUtility.closeGotItPopup(robot);
-
-        isRobotConnected = true;
 
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();

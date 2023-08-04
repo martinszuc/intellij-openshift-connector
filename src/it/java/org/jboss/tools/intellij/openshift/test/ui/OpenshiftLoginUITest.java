@@ -16,6 +16,7 @@ import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
+import com.thaiopensource.xml.dtd.om.Def;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,7 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
 
     private static final String DEFAULT_CLUSTER_URL = "https://kubernetes.default.svc/";
     private static final String CLUSTER_URL_TO_LOGIN = "https://api.ocp2.adapters-crs.ccitredhat.com:6443/";
+    private static final String USER_HOME = System.getProperty("user.home");
     private static final String USERNAME = "developer";
     private static final String PASSWD = "developer";
     private static String clusterUrl = DEFAULT_CLUSTER_URL;
@@ -60,17 +62,18 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         view.closeView();
     }
 
-    //@Test
+    @Test
     public void openshiftDefaultNodeAndUserLoggedOutTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
+        logOut();
         view.openView();
 
         // Wait for the "https://kubernetes.default.svc/" TreeItem to be available
-        waitFor(Duration.ofSeconds(10), () -> !view.getOpenshiftConnectorTree().findAllText(clusterUrl).isEmpty());
+        waitFor(Duration.ofSeconds(10), () -> !view.getOpenshiftConnectorTree().findAllText(DEFAULT_CLUSTER_URL).isEmpty());
 
         if (view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").isEmpty()) {
             // If the "Please log in to the cluster" item is not present, double-click on the TreeItem to expand it
-            view.getOpenshiftConnectorTree().findText(clusterUrl).doubleClick();
+            view.getOpenshiftConnectorTree().findText(DEFAULT_CLUSTER_URL).doubleClick();
         }
         // Verify that the "Please log in to the cluster" item is present
         assertTrue(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").size() > 0);
@@ -182,6 +185,13 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
         view.openView();
         view.waitForTreeItem(clusterUrl, 10, 1);
 
+        if (view.getOpenshiftConnectorTree().findAllText("my-test").isEmpty()) {
+            view.getOpenshiftConnectorTree().findText(clusterUrl).doubleClick();
+        }
+        view.waitForTreeItem("my-test", 10, 1);
+
+        assertFalse(view.getOpenshiftConnectorTree().findAllText("my-test").isEmpty());
+
         view.closeView();
         logOut();
     }
@@ -252,7 +262,7 @@ public class OpenshiftLoginUITest extends AbstractBaseTest {
                 .anyMatch(ComponentFixture::isShowing));
     }
     private void removeKubeConfig(){
-        Path configFilePath = Paths.get(System.getProperty("user.home"), ".kube", "config");
+        Path configFilePath = Paths.get(USER_HOME, ".kube", "config");
         try {
             Files.deleteIfExists(configFilePath);
         } catch (IOException e) {
