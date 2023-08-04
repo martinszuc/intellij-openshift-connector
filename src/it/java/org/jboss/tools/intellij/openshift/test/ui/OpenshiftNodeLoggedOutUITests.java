@@ -39,13 +39,13 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     private static final String DEFAULT_CLUSTER_URL = "https://kubernetes.default.svc/";
     private static final String CLUSTER_URL_TO_LOGIN = "https://api.ocp2.adapters-crs.ccitredhat.com:6443/";
-    private static final String CLUSTER_USERNAME = "developer";
-    private static final String CLUSTER_PASSWD = "developer";
-    // When defining your CLUSTER_URL_TO_LOGIN and CLUSTER_PASTE_LOGIN remember the '/' at the end as it is required to function properly
-    private static final String CLUSTER_PASTE_LOGIN = "oc login --token=sha256~DpgF-1l5jBeVC2WMGsQZsAPDNCcR_yNu1F_FQJdE4tw --server=https://api.ocp2.adapters-crs.ccitredhat.com:6443/";
-    private static final String CLUSTER_TOKEN = "sha256~DpgF-1l5jBeVC2WMGsQZsAPDNCcR_yNu1F_FQJdE4tw";
+    private static final String CLUSTER_USERNAME = "sampletext";
+    private static final String CLUSTER_PASSWD = "sampletext";
+    // When defining your CLUSTER_URL_TO_LOGIN and CLUSTER_PASTE_LOGIN please remember the '/' at the end of the string as it is required to function properly
+    private static final String CLUSTER_PASTE_LOGIN = "oc login --token=sha256~sampletextsampletextsampletextsampletextsampletext --server=https://api.ocp2.adapters-crs.ccitredhat.com:6443/";
+    private static final String CLUSTER_TOKEN = "sha256~sampletextsampletextsampletext";
     private static final String USER_HOME = System.getProperty("user.home");
-    private static final String MY_TEST_TREEITEM = "my-test";
+    private static final String NAMESPACE_STRING = "my-test";
     private static String currentClusterUrl = DEFAULT_CLUSTER_URL;
     private static final IntelliJVersion INTELLI_J_VERSION = IntelliJVersion.ULTIMATE_V_2021_2;
     private static final Integer INTELLI_J_PORT = 8580;
@@ -205,12 +205,12 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         view.openView();
         view.waitForTreeItem(currentClusterUrl, 10, 1);
 
-        if (view.getOpenshiftConnectorTree().findAllText(MY_TEST_TREEITEM).isEmpty()) {
+        if (view.getOpenshiftConnectorTree().findAllText(NAMESPACE_STRING).isEmpty()) {
             view.getOpenshiftConnectorTree().findText(currentClusterUrl).doubleClick();
         }
-        view.waitForTreeItem(MY_TEST_TREEITEM, 10, 1);
+        view.waitForTreeItem(NAMESPACE_STRING, 10, 1);
 
-        assertFalse(view.getOpenshiftConnectorTree().findAllText(MY_TEST_TREEITEM).isEmpty());
+        assertFalse(view.getOpenshiftConnectorTree().findAllText(NAMESPACE_STRING).isEmpty());
 
         view.closeView();
         logOut();
