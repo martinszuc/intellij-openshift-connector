@@ -66,28 +66,12 @@ public class IdeaRunner {
 		}
 	}
 
-	public void stopIDE() {
-		if (ideaIsStarted) {
-			System.out.println("Stopping IDE, setting ideaIsStarted to false");
-			UITestRunner.closeIde();
-			ideaIsStarted = false;
-		}
-	}
-
 	public RemoteRobot restartIDE(IntelliJVersion ideaVersion, int portNumber) {
 		return UITestRunner.restartIde(ideaVersion,portNumber);
-	}
-
-	public boolean getIdeaIsStarted() {
-		//TODO maybe check if its started for real
-		return ideaIsStarted;
 	}
 
 	public RemoteRobot getRemoteRobot() {
 		return robot;
 	}
-
-
-
 }
 
