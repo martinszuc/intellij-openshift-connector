@@ -55,7 +55,7 @@ public class ProjectUtility {
     }
 
     public static void selectNewProjectType(RemoteRobot robot, String projectType) {
-        ComponentFixture newProjectTypeList = robot.findAll(ComponentFixture.class, byXpath("JBList", "//div[contains(@visible_text, 'FX')]")).get(0);
+        ComponentFixture newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']")); //TODO notify about change
         newProjectTypeList.findText(projectType).click();
     }
 

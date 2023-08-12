@@ -73,6 +73,13 @@ public class GettingStartedView extends ContainerFixture {
     return getRemoteRobot().find(GettingStartedView.class, editorPaneLocator);
   }
 
+  public void resizeBorderLayoutPanel(int widthMultiplier) {
+    ComponentFixture borderLayoutPanel = find(ComponentFixture.class, byXpath("//div[@class='BorderLayoutPanel'][.//div[@class='BaseLabel']]"));
+    borderLayoutPanel.runJs("const { width, height } = component.getBounds(); component.setBounds(0, 0, width * " + widthMultiplier + ", height);");
+  }
+
+
+
   public ComponentFixture findBackToMainButton() {
     return getRemoteRobot().find(GettingStartedView.class, backToMainViewLocator);
   }
