@@ -135,7 +135,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            e.printStackTrace(); //TODO ask about warning and possible better logger solution
         }
 
         view.closeView();
@@ -212,6 +212,22 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
     }
+
+//    @Test
+//    public void DeveloperSandboxLoginTest() {
+//        OpenshiftView view = robot.find(OpenshiftView.class);
+//        openClusterLoginDialog(view);
+//
+//        ContainerFixture loginDialog = robot.find(ContainerFixture.class, byXpath("//div[@class='MyDialog']"));
+//
+//        // Locate the JEditorPane in the dialog
+//        JEditorPaneFixture editorPane = loginDialog.find(JEditorPaneFixture.class, byXpath("//div[@class='JEditorPane']"));
+//
+//        editorPane.clickHyperlink("Red Hat Developer Sandbox");
+//
+//    }
+
+
 
     private void checkIfLoggedIn(){
         OpenshiftView view = robot.find(OpenshiftView.class);

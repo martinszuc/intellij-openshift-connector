@@ -43,7 +43,7 @@ public class IdeaRunner {
 
 	private static IdeaRunner ideaRunner = null;
 	private static boolean ideaIsStarted = false;
-	private static int port = 8580;
+
 
 	private RemoteRobot robot;
 
@@ -59,9 +59,8 @@ public class IdeaRunner {
 	public void startIDE(IntelliJVersion ideaVersion, int portNumber) {
 		if (!ideaIsStarted) {
 			System.out.println("Starting IDE, setting ideaIsStarted to true");
-			robot = UITestRunner.runIde(ideaVersion, port);
-			port = portNumber; //TODO ask about order
-			System.out.println("IDEA port for remote robot: " + port);
+			robot = UITestRunner.runIde(ideaVersion, portNumber);
+			System.out.println("IDEA port for remote robot: " + portNumber);
 			ideaIsStarted = true;
 		}
 	}

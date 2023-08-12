@@ -44,7 +44,7 @@ public class BaseUITest extends AbstractBaseTest {
 		view.closeView();
 	}
 
-	//@Test
+	@Test
 	public void gettingStartedBehaviour() {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
