@@ -171,7 +171,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
             e.printStackTrace();
         }
 
-        //TODO maybe add a case for login failed window that would appear here
+        // TODO maybe add a case for login failed window that would appear here
 
         view.closeView();
         //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
@@ -212,7 +212,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         }
 
         view.closeView();
-        restart(INTELLI_J_VERSION, INTELLI_J_PORT);
+        //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
     }
 
@@ -245,7 +245,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         }
 
         view.closeView();
-        restart(INTELLI_J_VERSION, INTELLI_J_PORT);
+        //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
     }
 
@@ -329,12 +329,11 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     }
 
     private static void backupKubeConfig() {
-        //LOGGER.info("Backing up kube config file");
         try {
             Files.copy(CONFIG_FILE_PATH, BACKUP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
-            //LOGGER.info("Kube config file backed up successfully");S
         } catch (IOException e) {
-            //LOGGER.severe("Failed to backup kube config file: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("Failed to backup kube config file: " + e.getMessage());
         }
     }
 
