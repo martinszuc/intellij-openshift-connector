@@ -12,10 +12,7 @@ package org.jboss.tools.intellij.openshift.test.ui.views;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.ContainerFixture;
-import com.intellij.remoterobot.fixtures.DefaultXpath;
-import com.intellij.remoterobot.fixtures.FixtureName;
-import com.intellij.remoterobot.fixtures.JTreeFixture;
+import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +42,12 @@ public class OpenshiftView extends ContainerFixture {
 
   public void closeView() {
     final ToolWindowsPane toolWindowsPane = find(ToolWindowsPane.class);
-    toolWindowsPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
+    if (toolWindowsPane.find(ComponentFixture.class,byXpath("//div[@class='BaseLabel']"), Duration.ofSeconds(2)) != null) {
+      // OpenShift view is open, so we can close it
+      toolWindowsPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
+    } else {
+      // OpenShift view is not opened
+    }
   }
 
   public void expandOpenshiftViewTree(String path) {

@@ -14,12 +14,8 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.ContainerFixture;
 import com.intellij.remoterobot.fixtures.JButtonFixture;
 import com.intellij.remoterobot.fixtures.JTextFieldFixture;
-import com.intellij.remoterobot.stepsProcessing.StepLogger;
-import com.intellij.remoterobot.stepsProcessing.StepWorker;
 import com.intellij.remoterobot.utils.Keyboard;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
-import org.jaxen.expr.Step;
-import org.jboss.logging.Logger;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -70,22 +66,11 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     @AfterEach
     public void afterEachCleanUp() {
-//        // Check if any dialog windows are open
-//        List<ComponentFixture> dialogs = robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"));
-//        if (!dialogs.isEmpty()) {
-//            // Close the dialog windows
-//            Keyboard keyboard = new Keyboard(robot);
-//            keyboard.escape();
-//            keyboard.escape();
-//        }
-
-        // Check if the Openshift view is open
+        // Check if the Openshift view is open and if close
         try {
             OpenshiftView view = robot.find(OpenshiftView.class);
-            if (view != null) {
-                // Close the Openshift view
-                view.closeView();
-            }
+            robot.find(ComponentFixture.class, byXpath("//div[@class='BaseLabel']"), Duration.ofSeconds(2));
+            view.closeView();
         } catch (Exception e) {
             // The Openshift view is not open
         }
@@ -109,8 +94,8 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     @Test
     public void defaultNodeTest() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
         logOut();
+        OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
 
         // Wait for the default cluster URL TreeItem to be available
@@ -189,7 +174,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         //TODO maybe add a case for login failed window that would appear here
 
         view.closeView();
-        restart(INTELLI_J_VERSION, INTELLI_J_PORT);
+        //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
     }
 
@@ -289,6 +274,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     private void checkIfLoggedIn() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
+
         view.waitForTreeItem(currentClusterUrl, 20, 1);
         view.getOpenshiftConnectorTree().expand(currentClusterUrl);
         view.waitForTreeItem(DEFAULT_NAMESPACE, 20, 1);
