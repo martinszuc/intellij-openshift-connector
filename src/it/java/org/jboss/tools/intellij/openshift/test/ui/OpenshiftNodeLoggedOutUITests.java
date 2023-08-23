@@ -14,7 +14,6 @@ import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.ContainerFixture;
 import com.intellij.remoterobot.fixtures.JButtonFixture;
 import com.intellij.remoterobot.fixtures.JTextFieldFixture;
-import com.intellij.remoterobot.utils.Keyboard;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.AfterAll;
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
-    
+
     private static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
     private static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
     private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
@@ -52,7 +51,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     private static String currentClusterUrl = DEFAULT_CLUSTER_URL;
     private static final IntelliJVersion INTELLI_J_VERSION = IntelliJVersion.ULTIMATE_V_2021_2;
     private static final Integer INTELLI_J_PORT = 8580;
-    
+
     @BeforeAll
     public static void setUp() {
         backupKubeConfig();
@@ -74,6 +73,15 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         } catch (Exception e) {
             // The Openshift view is not open
         }
+        // If any of the login tests failed there will be a dialog window telling us so
+        try {
+            ContainerFixture dialogWindow = robot.find(ContainerFixture.class, byXpath("//div[@class='MyDialog']"));
+            dialogWindow.find(ComponentFixture.class, byXpath("//div[@class='JButton']")).click();
+            currentClusterUrl = DEFAULT_CLUSTER_URL;
+        } catch (Exception e) {
+            // No dialog windows found
+        }
+
     }
 
     @Test
@@ -104,7 +112,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         view.waitForTreeItem("Please log in to the cluster", 20, 1);
 
         // Verify that the "Please log in to the cluster" item is present
-        assertTrue(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").size() > 0);
+        assertFalse(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").isEmpty());
 
         view.closeView();
     }
@@ -124,9 +132,8 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
                 .anyMatch(ComponentFixture::isShowing));
 
         // Close the dialog window
-        Keyboard keyboard = new Keyboard(robot);
-        keyboard.escape();
-        keyboard.escape();
+        ContainerFixture dialogWindow = robot.find(ContainerFixture.class, byXpath("//div[@class='MyDialog']"));
+        dialogWindow.find(ComponentFixture.class, byXpath("//div[@text.key='button.cancel']")).click();
 
         // Verify that the login window is not present
         assertFalse(robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
@@ -165,13 +172,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
         JButtonFixture okButton = robot.find(JButtonFixture.class, byXpath("//div[@visible_text='OK']"));
         okButton.click();
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // TODO maybe add a case for login failed window that would appear here
 
         view.closeView();
         //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
@@ -205,12 +205,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         currentClusterUrl = CLUSTER_URL;
         checkUrlFormat();
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         view.closeView();
         //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
@@ -237,16 +231,33 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         okButton.click();
         currentClusterUrl = CLUSTER_URL;
         checkUrlFormat();
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         view.closeView();
         //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
+    }
+
+    //@Test
+    public void aboutLoggedOutTest() {
+        OpenshiftView view = robot.find(OpenshiftView.class);
+        view.openView();
+
+        waitFor(Duration.ofSeconds(20), () -> !view.getOpenshiftConnectorTree().findAllText(currentClusterUrl).isEmpty());
+        view.getOpenshiftConnectorTree().findText(currentClusterUrl).rightClick();
+
+        // Wait for the "About" option to become visible and click on it
+        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@text='About']"))
+                .stream()
+                .anyMatch(ComponentFixture::isShowing));
+        robot.find(ComponentFixture.class, byXpath("//div[@text='About']"))
+                .click();
+
+        // Wait for the JBTerminalPanel to become visible
+        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"))
+                .stream()
+                .anyMatch(ComponentFixture::isShowing));
+
+        ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"));
+
     }
 
     //@Test
@@ -275,9 +286,9 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
 
-        view.waitForTreeItem(currentClusterUrl, 20, 1);
+        view.waitForTreeItem(currentClusterUrl, 60, 1);
         view.getOpenshiftConnectorTree().expand(currentClusterUrl);
-        view.waitForTreeItem(DEFAULT_NAMESPACE, 20, 1);
+        view.waitForTreeItem(DEFAULT_NAMESPACE, 60, 1);
         assertFalse(view.getOpenshiftConnectorTree().findAllText(DEFAULT_NAMESPACE).isEmpty());
 
         view.closeView();
@@ -313,7 +324,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         view.waitForTreeItem(currentClusterUrl, 20, 1);
         view.getOpenshiftConnectorTree().expand(currentClusterUrl);
         view.waitForTreeItem("Please log in to the cluster", 20, 1);
-        assertTrue(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").size() > 0);
+        assertFalse(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").isEmpty());
 
         view.closeView();
     }
@@ -323,7 +334,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         try {
             Files.deleteIfExists(configFilePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             System.err.println("Failed to delete kube config file: " + e.getMessage());
         }
     }
@@ -332,7 +343,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         try {
             Files.copy(CONFIG_FILE_PATH, BACKUP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             System.err.println("Failed to backup kube config file: " + e.getMessage());
         }
     }
@@ -341,7 +352,8 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         try {
             Files.copy(BACKUP_FILE_PATH, CONFIG_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            // TODO find better alternative for logging
             System.err.println("Failed to restore kube config file: " + e.getMessage());
         }
     }
