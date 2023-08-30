@@ -16,10 +16,14 @@ import com.intellij.remoterobot.fixtures.JButtonFixture;
 import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
+import org.jboss.tools.intellij.openshift.ui.sandbox.SandboxLoginPage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -34,17 +38,17 @@ import java.util.List;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenshiftNodeLoggedOutUITests.class);
 
     private static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
     private static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
     private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
     private static final String CLUSTER_TOKEN = System.getenv("CLUSTER_TOKEN");
     private static final String DEFAULT_CLUSTER_URL = "https://kubernetes.default.svc/";
-    private static final String DEFAULT_NAMESPACE = "my-test";
     private static final String USER_HOME = System.getProperty("user.home");
     private static final Path CONFIG_FILE_PATH = Paths.get(USER_HOME, ".kube", "config");
     private static final Path BACKUP_FILE_PATH = Paths.get(USER_HOME, ".kube", "config.bak");
@@ -145,9 +149,9 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     @Test
     public void pasteLoginTest() {
-
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
+        logOut();
 
         // Locate the fields
         JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + currentClusterUrl + "']"));
@@ -183,6 +187,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     public void usernameLoginTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
+        logOut();
 
         // Locate the Cluster URL, username JTextField
         JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + currentClusterUrl + "']"));
@@ -206,7 +211,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         checkUrlFormat();
 
         view.closeView();
-        //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
+//        restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
     }
 
@@ -214,6 +219,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     public void tokenLoginTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
+        logOut();
 
         // Locate the Cluster URL JTextField
         JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + currentClusterUrl + "']"));
@@ -232,14 +238,20 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         currentClusterUrl = CLUSTER_URL;
         checkUrlFormat();
         view.closeView();
-        //restart(INTELLI_J_VERSION, INTELLI_J_PORT);
+//        restart(INTELLI_J_VERSION, INTELLI_J_PORT);
         checkIfLoggedIn();
     }
 
-    //@Test
+    //    @Test
+    public void restartTest() {
+        restart(INTELLI_J_VERSION, INTELLI_J_PORT);
+    }
+
+    //    @Test
     public void aboutLoggedOutTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
+        logOut();
 
         waitFor(Duration.ofSeconds(20), () -> !view.getOpenshiftConnectorTree().findAllText(currentClusterUrl).isEmpty());
         view.getOpenshiftConnectorTree().findText(currentClusterUrl).rightClick();
@@ -260,7 +272,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     }
 
-    //@Test
+    //    @Test
     public void devSandboxTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         openClusterLoginDialog(view);
@@ -286,11 +298,22 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
 
-        view.waitForTreeItem(currentClusterUrl, 60, 1);
-        view.getOpenshiftConnectorTree().expand(currentClusterUrl);
-        view.waitForTreeItem(DEFAULT_NAMESPACE, 60, 1);
-        assertFalse(view.getOpenshiftConnectorTree().findAllText(DEFAULT_NAMESPACE).isEmpty());
+        view.getOpenshiftConnectorTree().rightClick();
+        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@text='Refresh']"))
+                .stream()
+                .anyMatch(ComponentFixture::isShowing));
+        robot.find(ComponentFixture.class, byXpath("//div[@text='Refresh']"))
+                .click();
 
+        LOGGER.info("Waiting for '" + currentClusterUrl + "' to appear.");
+        try {
+            view.waitForTreeItem(currentClusterUrl, 60, 1);
+            view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
+            view.waitForTreeItem("No deployments, click here to create one.", 60, 1);
+        } catch (Exception e) {
+            LOGGER.error("Waiting for '" + currentClusterUrl + "' has failed, login could not be verified!");
+            fail("Login could not be verified!");
+        }
         view.closeView();
         logOut();
     }
@@ -316,47 +339,38 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     }
 
     private void logOut() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        view.openView();
-
         removeKubeConfig();
         currentClusterUrl = DEFAULT_CLUSTER_URL;
-        view.waitForTreeItem(currentClusterUrl, 20, 1);
-        view.getOpenshiftConnectorTree().expand(currentClusterUrl);
-        view.waitForTreeItem("Please log in to the cluster", 20, 1);
-        assertFalse(view.getOpenshiftConnectorTree().findAllText("Please log in to the cluster").isEmpty());
-
-        view.closeView();
     }
 
     private static void removeKubeConfig() {
         Path configFilePath = Paths.get(USER_HOME, ".kube", "config");
         try {
+            LOGGER.info("Attempting to delete kube config file");
             Files.deleteIfExists(configFilePath);
         } catch (IOException e) {
-            //e.printStackTrace();
-            System.err.println("Failed to delete kube config file: " + e.getMessage());
+            LOGGER.error("Failed to delete kube config file: {}", e.getMessage());
         }
     }
 
     private static void backupKubeConfig() {
         try {
+            LOGGER.info("Attempting to backup kube config file");
             Files.copy(CONFIG_FILE_PATH, BACKUP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            //e.printStackTrace();
-            System.err.println("Failed to backup kube config file: " + e.getMessage());
+            LOGGER.error("Failed to backup kube config file: {}", e.getMessage());
         }
     }
 
     private static void restoreKubeConfig() {
         try {
+            LOGGER.info("Attempting to restore kube config file");
             Files.copy(BACKUP_FILE_PATH, CONFIG_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            //e.printStackTrace();
-            // TODO find better alternative for logging
-            System.err.println("Failed to restore kube config file: " + e.getMessage());
+            LOGGER.error("Failed to restore kube config file: {}", e.getMessage());
         }
     }
+
 
     private void checkUrlFormat() {
         if (!currentClusterUrl.endsWith("/")) {
