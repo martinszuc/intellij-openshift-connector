@@ -272,28 +272,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     }
 
-    //    @Test
-    public void devSandboxTest() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        openClusterLoginDialog(view);
-
-        ContainerFixture loginDialog = robot.find(ContainerFixture.class, byXpath("//div[@class='MyDialog']"));
-
-        // Find the JEditorPane component containing the desired text
-        ComponentFixture jEditorPane = loginDialog.find(ComponentFixture.class, byXpath("//div[@class='JEditorPane']"));
-
-        // Specify the position of the hyperlink within the JEditorPane component
-        int x = 213; // x coordinate of the hyperlink
-        int y = 41; // y coordinate of the hyperlink
-
-        Point linkPosition = new Point(x, y);
-
-        // Simulate a click on the hyperlink
-        jEditorPane.click(linkPosition);
-
-    }
-
-
     private void checkIfLoggedIn() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
@@ -370,7 +348,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
             LOGGER.error("Failed to restore kube config file: {}", e.getMessage());
         }
     }
-
 
     private void checkUrlFormat() {
         if (!currentClusterUrl.endsWith("/")) {
