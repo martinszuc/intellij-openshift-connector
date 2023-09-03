@@ -55,7 +55,6 @@ public class ProjectUtility {
     }
 
     public static void selectNewProjectType(RemoteRobot robot, String projectType) {
-        // TODO notify about change
         ComponentFixture newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']"));
         newProjectTypeList.findText(projectType).click();
     }
@@ -99,7 +98,6 @@ public class ProjectUtility {
         final IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilProjectImportIsComplete();
     }
-
 
     public static void sleep(long ms) {
         System.out.println("Putting thread into sleep for: " + ms + " ms");
