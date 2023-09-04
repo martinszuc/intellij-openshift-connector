@@ -61,18 +61,10 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     @AfterEach
     public void afterEachCleanUp() {
         try {
-            LOGGER.info("After test cleanup: Checking for opened Openshift view");
-            OpenshiftView view = robot.find(OpenshiftView.class);
-            robot.find(ComponentFixture.class, byXpath("//div[@class='BaseLabel']"), Duration.ofSeconds(2));
-            view.closeView();
-        } catch (Exception e) {
-            LOGGER.info("After test cleanup: Openshift view is not opened");
-        }
-
-        try {
             LOGGER.info("After test cleanup: Checking for any opened dialog window");
             ContainerFixture dialogWindow = robot.find(ContainerFixture.class, byXpath("//div[@class='MyDialog']"));
-            dialogWindow.find(ComponentFixture.class, byXpath("//div[@class='JButton']")).click();
+            dialogWindow.find(ComponentFixture.class, byXpath("//div[@class='JButton']"))
+                    .click();
             currentClusterUrl = DEFAULT_CLUSTER_URL;
         } catch (Exception e) {
             LOGGER.info("After test cleanup: No dialog window opened");
@@ -84,6 +76,15 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
                     .click();
         } catch (Exception e) {
             LOGGER.info("After test cleanup: No run window opened");
+        }
+
+        try {
+            LOGGER.info("After test cleanup: Checking for opened Openshift view");
+            OpenshiftView view = robot.find(OpenshiftView.class);
+            robot.find(ComponentFixture.class, byXpath("//div[@class='BaseLabel']"), Duration.ofSeconds(2));
+            view.closeView();
+        } catch (Exception e) {
+            LOGGER.info("After test cleanup: Openshift view is not opened");
         }
     }
 

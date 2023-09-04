@@ -14,11 +14,9 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
-import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
-import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,16 +44,6 @@ abstract public class AbstractBaseTest {
             ProjectUtility.closeGotItPopup(robot);
             hasConnectedToTestIDE = true;
         }
-        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
-        ideStatusBar.waitUntilAllBgTasksFinish();
-    }
-
-    protected static void restart(IntelliJVersion ideaVersion, int portNumber) {
-        robot = IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
-        hasConnectedToTestIDE = true;
-
-        ProjectUtility.closeTipDialogIfItAppears(robot);
-
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
     }
