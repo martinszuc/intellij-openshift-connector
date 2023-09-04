@@ -12,36 +12,33 @@ package org.jboss.tools.intellij.openshift.test.ui;
 
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
-import com.intellij.remoterobot.utils.Keyboard;
-import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.Test;
 
-import java.awt.event.KeyEvent;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.yaml.snakeyaml.tokens.Token.ID.Key;
 
 /**
  * @author Ihor Okhrimenko, Ondrej Dockal, Richard Kocian
  * Base UI test class verifying presence of tested extensions and OpenShift View presence and content
  */
 public class BaseUITest extends AbstractBaseTest {
+
 	@Test
 	public void openshiftExtensionTest() {
-		waitFor(Duration.ofSeconds(20), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable("OpenShift"));
-		waitFor(Duration.ofSeconds(20), Duration.ofSeconds(1), "The 'Kubernetes' stripe button is not available.", () -> isStripeButtonAvailable("Kubernetes"));
-		waitFor(Duration.ofSeconds(20), Duration.ofSeconds(1), "The 'Getting Started' stripe button is not available.", () -> isStripeButtonAvailable("Getting Started"));
+		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'OpenShift' stripe button is not available.", () -> isStripeButtonAvailable("OpenShift"));
+		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Kubernetes' stripe button is not available.", () -> isStripeButtonAvailable("Kubernetes"));
+		waitFor(Duration.ofSeconds(10), Duration.ofSeconds(1), "The 'Getting Started' stripe button is not available.", () -> isStripeButtonAvailable("Getting Started"));
 	}
 
 	@Test
 	public void openshiftViewTest() {
-		OpenshiftView view = robot.find(OpenshiftView.class);
+        OpenshiftView view = robot.find(OpenshiftView.class);
 		view.openView();
 		view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);
 		view.waitForTreeItem("Devfile registries", 10, 1);
@@ -68,9 +65,8 @@ public class BaseUITest extends AbstractBaseTest {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
 
-		maximalizeToolWindow();
+		view.maximalizeToolWindow(robot);
 
-		view.waitForTreeItem("Login/Provision OpenShift cluster", 10, 1);
 		view.getGettingStartedTree().findText("Login/Provision OpenShift cluster").click();
 		assertFalse(view.findEditorPaneFixture().findAllText().isEmpty(), "Login/Provision OpenShift cluster item has empty description!");
 
@@ -81,7 +77,6 @@ public class BaseUITest extends AbstractBaseTest {
 
 		view.findBackToMainButton().click();
 
-		view.waitForTreeItem("Debug the component", 10, 1);
 		view.getGettingStartedTree().findText("Debug the component").click();
 		assertFalse(view.findEditorPaneFixture().findAllText().isEmpty(), "Debug the component item has empty description!");
 
@@ -99,9 +94,5 @@ public class BaseUITest extends AbstractBaseTest {
 		view.closeView();
 	}
 
-	private void maximalizeToolWindow() {
-		//TODO maybe fix for other operating systems
-		Keyboard keyboard = new Keyboard(robot);
-		keyboard.hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_QUOTE);
-	}
+
 }
