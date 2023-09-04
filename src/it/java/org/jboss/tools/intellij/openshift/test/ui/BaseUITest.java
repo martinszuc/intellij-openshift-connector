@@ -37,15 +37,6 @@ public class BaseUITest extends AbstractBaseTest {
 	}
 
 	@Test
-	public void openshiftViewTest() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
-		view.openView();
-		view.waitForTreeItem("https://kubernetes.default.svc/", 10, 1);
-		view.waitForTreeItem("Devfile registries", 10, 1);
-		view.closeView();
-	}
-
-	@Test
 	public void gettingStartedContainsAllItems() {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
