@@ -14,6 +14,7 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
+import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
@@ -32,14 +33,26 @@ import java.time.Duration;
 abstract public class AbstractBaseTest {
 
     protected static RemoteRobot robot;
+    private static boolean hasConnectedToTestIDE = false;
 
     @BeforeAll
     public static void connect() {
-        robot = IdeaRunner.getInstance().getRemoteRobot();
-        ProjectUtility.createEmptyProject(robot, "test-project");
+        if (!hasConnectedToTestIDE) {
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            ProjectUtility.createEmptyProject(robot, "test-project");
+            ProjectUtility.closeTipDialogIfItAppears(robot);
+            ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+            ProjectUtility.closeGotItPopup(robot);
+            hasConnectedToTestIDE = true;
+        }
+        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
+        ideStatusBar.waitUntilAllBgTasksFinish();
+    }
+
+    protected static void restart(IntelliJVersion ideaVersion, int portNumber) {
+        robot = IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
+        hasConnectedToTestIDE = true;
         ProjectUtility.closeTipDialogIfItAppears(robot);
-        ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-        ProjectUtility.closeGotItPopup(robot);
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
     }

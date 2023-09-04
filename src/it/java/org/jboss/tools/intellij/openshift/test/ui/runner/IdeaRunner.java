@@ -16,38 +16,43 @@ import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 
 /**
  * Idea Runner singleton to keep track of running IDE
- * @author Ondrej Dockal
  *
+ * @author Ondrej Dockal
  */
 public class IdeaRunner {
 
-	private static IdeaRunner ideaRunner = null;
-	private static boolean ideaIsStarted = false;
-	private static int port = 8580;
+    private static IdeaRunner ideaRunner = null;
+    private static boolean ideaIsStarted = false;
+    private static int port = 8580;
 
-	private RemoteRobot robot;
-	
-	private IdeaRunner() {}
-	
-	public static IdeaRunner getInstance() {
-		if (ideaRunner == null) {
-			ideaRunner = new IdeaRunner();
-		}
-		return ideaRunner;
-	}
-	
-	public void startIDE(IntelliJVersion ideaVersion, int portNumber) {
-		if (!ideaIsStarted) {
-			System.out.println("Starting IDE, setting ideaIsStarted to true");
-			robot = UITestRunner.runIde(ideaVersion, port);
-			port = portNumber;
-			System.out.println("IDEA port for remote robot: " + port);
-			ideaIsStarted = true;
-		}
-	}
+    private RemoteRobot robot;
 
-	public RemoteRobot getRemoteRobot() {
-		return robot;
-	}
+    private IdeaRunner() {
+    }
+
+    public static IdeaRunner getInstance() {
+        if (ideaRunner == null) {
+            ideaRunner = new IdeaRunner();
+        }
+        return ideaRunner;
+    }
+
+    public void startIDE(IntelliJVersion ideaVersion, int portNumber) {
+        if (!ideaIsStarted) {
+            System.out.println("Starting IDE, setting ideaIsStarted to true");
+            robot = UITestRunner.runIde(ideaVersion, port);
+            port = portNumber;
+            System.out.println("IDEA port for remote robot: " + port);
+            ideaIsStarted = true;
+        }
+    }
+
+    public RemoteRobot restartIDE(IntelliJVersion ideaVersion, int portNumber) {
+        return UITestRunner.restartIde(ideaVersion, portNumber);
+    }
+
+    public RemoteRobot getRemoteRobot() {
+        return robot;
+    }
 
 }
