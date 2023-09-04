@@ -2,8 +2,9 @@ package org.jboss.tools.intellij.openshift.test.ui.steps;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
-import com.intellij.remoterobot.utils.Keyboard;
+import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,50 +17,39 @@ import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class SharedSteps {
     final private RemoteRobot robot;
-    final private Keyboard keyboard;
     private static final String USER_HOME = System.getProperty("user.home");
-    private static final Path CONFIG_FILE_PATH = Paths.get(USER_HOME, ".kube", "config");
+    private static final Path CONFIG_FILE_PATH = getKubeConfigPath();
     private static final Path BACKUP_FILE_PATH = Paths.get(USER_HOME, ".kube", "config.bak");
     private static final Logger LOGGER = LoggerFactory.getLogger(SharedSteps.class);
 
     public SharedSteps(RemoteRobot robot) {
         this.robot = robot;
-        this.keyboard = new Keyboard(robot);
     }
 
     public void openLoginDialog(OpenshiftView view) {
+        LOGGER.info("Opening cluster login dialog");
         view.openView();
-        rightClickAndSelect(view, 0, "//div[@text='Log in to cluster']");
-        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@text='Cluster URL:']"))
-                .stream()
-                .anyMatch(ComponentFixture::isShowing));
+        menuRightClickAndSelect(view, 0, byXpath("//div[@text='Log in to cluster']"));
+        waitForComponentToAppear(20, 1, byXpath("//div[@text='Cluster URL:']"));
     }
 
     public void verifyClusterLogin(String expectedURL) {
+        LOGGER.info("Verifying login");
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
 
-        rightClickAndSelect(view, 0, "//div[@text='Refresh']");
+        menuRightClickAndSelect(view, 0, byXpath("//div[@text='Refresh']"));
         LOGGER.info("Waiting for '" + expectedURL + "' to appear.");
-
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
 
         view.waitForTreeItem(expectedURL, 60, 1);
         try {
             view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
         } catch (Exception e) {
-            view.closeView();  //TODO check if works
-            view.openView();   //TODO check if works
+            view.closeView();
+            view.openView();
             try {
                 view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
             } catch (Exception ex) {
@@ -67,31 +57,33 @@ public class SharedSteps {
             }
         }
 
-        rightClickAndSelect(view, 0, "//div[@text='Refresh']");
+        menuRightClickAndSelect(view, 0, byXpath("//div[@text='Refresh']"));
         view.getOpenshiftConnectorTree().rightClickRow(0);
-        waitFor(Duration.ofSeconds(60), () -> robot.findAll(ComponentFixture.class, byXpath("//div[@text='Open Console Dashboard']"))
-                .stream()
-                .anyMatch(ComponentFixture::isShowing));
+        waitForComponentToAppear(60, 1, byXpath("//div[@text='Open Console Dashboard']"));
+        LOGGER.info("Login successfully verified");
 
         view.closeView();
     }
 
-    public void rightClickAndSelect(OpenshiftView view, int row, String xpath) {
-        view.getOpenshiftConnectorTree().clickRow(0);
+    public void menuRightClickAndSelect(OpenshiftView view, int row, Locator xpath) {
+        view.getOpenshiftConnectorTree().clickRow(row);
         view.getOpenshiftConnectorTree().rightClickRow(row);
-
-        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, byXpath(xpath))
-                .stream()
-                .anyMatch(ComponentFixture::isShowing));
-        robot.find(ComponentFixture.class, byXpath(xpath))
+        waitForComponentToAppear(20, 1, xpath);
+        robot.find(ComponentFixture.class, xpath)
                 .click();
     }
 
+    public void waitForComponentToAppear(int duration, int interval, Locator xpath) {
+        waitFor(Duration.ofSeconds(duration), Duration.ofSeconds(interval), () -> robot.findAll(ComponentFixture.class, xpath)
+                .stream()
+                .anyMatch(ComponentFixture::isShowing));
+
+    }
+
     public void removeKubeConfig() {
-        Path configFilePath = Paths.get(USER_HOME, ".kube", "config");
         try {
             LOGGER.info("Attempting to delete kube config file");
-            Files.deleteIfExists(configFilePath);
+            Files.deleteIfExists(CONFIG_FILE_PATH);
         } catch (IOException e) {
             LOGGER.error("Failed to delete kube config file: {}", e.getMessage());
         }
@@ -114,4 +106,18 @@ public class SharedSteps {
             LOGGER.error("Failed to restore kube config file: {}", e.getMessage());
         }
     }
+    @NotNull
+    public static Path getKubeConfigPath() {
+        Path configFilePath;
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            configFilePath = Paths.get(System.getenv("USERPROFILE"), ".kube", "config");
+        } else if (os.contains("mac")) {
+            configFilePath = Paths.get(System.getProperty("user.home"), ".kube", "config");
+        } else {
+            configFilePath = Paths.get(USER_HOME, ".kube", "config");
+        }
+        return configFilePath;
+    }
+
 }

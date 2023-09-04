@@ -38,7 +38,6 @@ abstract public class AbstractBaseTest {
 
     @BeforeAll
     public static void connect() {
-        // Check if the test is already connected to the test IDE. If not, connect to it and set the flag to true
         if (!hasConnectedToTestIDE) {
             robot = getInstance().getRemoteRobot();
             ProjectUtility.createEmptyProject(robot, "test-project");
@@ -52,7 +51,6 @@ abstract public class AbstractBaseTest {
     }
 
     protected static void restart(IntelliJVersion ideaVersion, int portNumber) {
-        // Restart the test IDE
         robot = IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
         hasConnectedToTestIDE = true;
 
