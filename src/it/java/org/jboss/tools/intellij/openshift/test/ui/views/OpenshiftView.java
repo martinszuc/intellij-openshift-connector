@@ -15,6 +15,7 @@ import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowsPane;
+import org.jboss.tools.intellij.openshift.test.ui.steps.SharedSteps;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -30,6 +31,9 @@ import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 @DefaultXpath(by = "OpenshiftView type", xpath = "//div[@class='IdeFrameImpl']")
 @FixtureName(name = "Openshift View")
 public class OpenshiftView extends ContainerFixture {
+
+  private final SharedSteps sharedSteps = new SharedSteps();
+
   public OpenshiftView(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
     super(remoteRobot, remoteComponent);
   }
@@ -43,7 +47,6 @@ public class OpenshiftView extends ContainerFixture {
   public void closeView() {
     final ToolWindowsPane toolWindowsPane = find(ToolWindowsPane.class);
     if (toolWindowsPane.find(ComponentFixture.class,byXpath("//div[@class='BaseLabel']"), Duration.ofSeconds(2)) != null) {
-      // OpenShift view is open, so we can close it
       toolWindowsPane.button(byXpath("//div[@tooltiptext='OpenShift']"), Duration.ofSeconds(2)).click();
     } else {
       // OpenShift view is not opened
@@ -64,6 +67,14 @@ public class OpenshiftView extends ContainerFixture {
   public JTreeFixture getOpenshiftConnectorTree(){
     return find(JTreeFixture.class, byXpath("//div[@class='Tree']"), Duration.ofSeconds(30));
   }
+
+  public void menuRightClickAndSelect(RemoteRobot robot, int row, String selection) {
+    getOpenshiftConnectorTree().clickRow(row);
+    getOpenshiftConnectorTree().rightClickRow(row);
+    sharedSteps.waitForComponentByXpath(robot,20, 1, byXpath("//div[@text='" + selection + "']"));
+    robot.find(ComponentFixture.class, byXpath("//div[@text='" + selection + "']")).click();
+  }
+
 
   private boolean isStripeButtonAvailable(ToolWindowsPane toolWindowsPane, String label) {
     try {

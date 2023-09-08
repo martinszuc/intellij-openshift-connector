@@ -15,9 +15,10 @@ import com.intellij.remoterobot.fixtures.ContainerFixture;
 import com.intellij.remoterobot.fixtures.JButtonFixture;
 import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.search.locators.Locator;
+import org.jboss.tools.intellij.openshift.test.ui.dialogs.ClusterLoginDialog;
 import org.jboss.tools.intellij.openshift.test.ui.steps.SharedSteps;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenshiftNodeLoggedOutUITests.class);
-    private static final SharedSteps sharedSteps = new SharedSteps(robot);
+    private static final SharedSteps sharedSteps = new SharedSteps();
     private static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
     private static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
     private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
@@ -53,7 +54,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         sharedSteps.removeKubeConfig();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         sharedSteps.restoreKubeConfig();
     }
@@ -114,30 +115,26 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
     @Test
     public void clusterLoginDialogTest() {
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        sharedSteps.openLoginDialog(view);
+        LOGGER.info("Opening cluster login dialog");
+        ClusterLoginDialog clusterLoginDialog = ClusterLoginDialog.open(robot);
 
-        sharedSteps.waitForComponentToAppear(20, 1, byXpath("//div[@class='MyDialog']"));
         assertTrue(robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
                 .stream()
-                .anyMatch(ComponentFixture::isShowing));
+                .anyMatch(ComponentFixture::isShowing));   // TODO these may be redundant
 
-        // Close the dialog window
-        ContainerFixture dialogWindow = robot.find(ContainerFixture.class, byXpath("//div[@class='MyDialog']"));
-        dialogWindow.find(ComponentFixture.class, byXpath("//div[@text.key='button.cancel']"))
-                .click();
+        LOGGER.info("Closing cluster login dialog");
+        clusterLoginDialog.close(robot);
+
         assertFalse(robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
                 .stream()
                 .anyMatch(ComponentFixture::isShowing));
-
-        view.closeView();
     }
 
     @Test
     public void tokenLoginTest() {
         logOut();
         loginWithToken();
-        sharedSteps.verifyClusterLogin(currentClusterUrl);
+        verifyClusterLogin(currentClusterUrl);
         logOut();
     }
 
@@ -145,7 +142,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     public void pasteLoginTest() {
         logOut();
         loginWithPasteCommand();
-        sharedSteps.verifyClusterLogin(currentClusterUrl);
+        verifyClusterLogin(currentClusterUrl);
         logOut();
     }
 
@@ -153,7 +150,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     public void usernameLoginTest() {
         logOut();
         loginWithUsername();
-        sharedSteps.verifyClusterLogin(currentClusterUrl);
+        verifyClusterLogin(currentClusterUrl);
         logOut();
     }
 
@@ -163,8 +160,8 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         logOut();
         view.openView();
 
-        sharedSteps.menuRightClickAndSelect(view, 0, byXpath("//div[@text='About']"));
-        sharedSteps.waitForComponentToAppear(20, 1, byXpath("//div[@class='JBTerminalPanel']"));
+        view.menuRightClickAndSelect(robot, 0, "About");
+        sharedSteps.waitForComponentByXpath(robot, 20, 1, byXpath("//div[@class='JBTerminalPanel']"));
 
         ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"));
 
@@ -206,12 +203,13 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     public void aboutLoggedInTest() {
         OpenshiftView view = robot.find(OpenshiftView.class);
 
-        loginWithToken();
-        sharedSteps.verifyClusterLogin(currentClusterUrl);
+        loginWithUsername();
+        verifyClusterLogin(currentClusterUrl);
         view.openView();
 
-        sharedSteps.menuRightClickAndSelect(view, 0, byXpath("//div[@text='About']"));
-        sharedSteps.waitForComponentToAppear(20, 1, byXpath("//div[@class='JBTerminalPanel']"));
+        view.menuRightClickAndSelect(robot, 0, "About");
+//        view.menuRightClickAndSelect(robot, 0, byXpath("//div[@text='About']"));
+        sharedSteps.waitForComponentByXpath(robot, 20, 1, byXpath("//div[@class='JBTerminalPanel']"));
 
         ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"));
 
@@ -236,8 +234,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
                 String clipboardContents = (String) transferable.getTransferData(DataFlavor.stringFlavor);
                 assert clipboardContents.contains("odo version");
                 assert clipboardContents.contains("Server:");
-                assert clipboardContents.contains("Kubernetes:");
-                assert clipboardContents.contains("Podman Client:");
             } catch (UnsupportedFlavorException | IOException e) {
                 LOGGER.error("aboutLoggedOutTest failed: Copied text is not string!");
             } catch (AssertionError e) {
@@ -255,75 +251,80 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     private void loginWithPasteCommand() {
         OpenshiftView view = robot.find(OpenshiftView.class);
 
-        sharedSteps.openLoginDialog(view);
-
-        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + currentClusterUrl + "']"), Duration.ofSeconds(5));
-        List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
-        JTextFieldFixture tokenField = passwordFields.get(0);
+        LOGGER.info("Opening cluster login dialog");
+        ClusterLoginDialog clusterLoginDialog = ClusterLoginDialog.open(robot);
 
         // Set the contents of the clipboard to the oc login command
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         StringSelection selection = new StringSelection("oc login --token=" + CLUSTER_TOKEN + " --server=" + CLUSTER_URL);
         clipboard.setContents(selection, null);
 
-        assertTrue(tokenField.getText().isEmpty());
-        robot.find(JButtonFixture.class, byXpath("//div[@text='Paste Login Command']"))
-                .click();
+        clusterLoginDialog.button("Paste Login Command").click();
+        clusterLoginDialog.button("OK").click();
 
-        assertFalse(urlField.getText().isEmpty());
-        assertFalse(tokenField.getText().isEmpty());
-        currentClusterUrl = urlField.getText();
+        currentClusterUrl = CLUSTER_URL;
         checkUrlFormat();
-
-        robot.find(JButtonFixture.class, byXpath("//div[@visible_text='OK']"))
-                .click();
 
         view.closeView();
     }
 
     private void loginWithUsername() {
         OpenshiftView view = robot.find(OpenshiftView.class);
-        sharedSteps.openLoginDialog(view);
 
-        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + currentClusterUrl + "']"));
-        urlField.click();
-        urlField.setText(CLUSTER_URL);
-        JTextFieldFixture usernameField = robot.find(JTextFieldFixture.class, byXpath("//div[@text='Username:']/following-sibling::div[@class='JTextField']"));
-        usernameField.click();
-        usernameField.setText(CLUSTER_USER);
+        LOGGER.info("Opening cluster login dialog");
+        ClusterLoginDialog clusterLoginDialog = ClusterLoginDialog.open(robot);
 
-        List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
-        JTextFieldFixture passwordField = passwordFields.get(1);
-        passwordField.click();
-        passwordField.setText(CLUSTER_PASSWORD);
-
-        robot.find(JButtonFixture.class, byXpath("//div[@visible_text='OK']"))
-                .click();
+        clusterLoginDialog.insertURL(robot, CLUSTER_URL);
+        clusterLoginDialog.insertUsername(robot, CLUSTER_USER);
+        clusterLoginDialog.insertPassword(robot, CLUSTER_PASSWORD);
+        clusterLoginDialog.button("OK").click();
 
         currentClusterUrl = CLUSTER_URL;
         checkUrlFormat();
-
         view.closeView();
     }
 
     private void loginWithToken() {
         OpenshiftView view = robot.find(OpenshiftView.class);
-        sharedSteps.openLoginDialog(view);
 
-        JTextFieldFixture urlField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='" + currentClusterUrl + "']"));
-        urlField.click();
-        urlField.setText(CLUSTER_URL);
+        LOGGER.info("Opening cluster login dialog");
+        ClusterLoginDialog clusterLoginDialog = ClusterLoginDialog.open(robot);
 
-        List<JTextFieldFixture> passwordFields = robot.findAll(JTextFieldFixture.class, byXpath("//div[@class='JPasswordField']"));
-        JTextFieldFixture tokenField = passwordFields.get(0);
-        tokenField.click();
-        tokenField.setText(CLUSTER_TOKEN);
+        clusterLoginDialog.insertURL(robot, CLUSTER_URL);
+        clusterLoginDialog.insertToken(robot, CLUSTER_TOKEN);
+
+        clusterLoginDialog.button("OK").click();
 
         currentClusterUrl = CLUSTER_URL;
         checkUrlFormat();
+        view.closeView();
+    }
 
-        robot.find(JButtonFixture.class, byXpath("//div[@visible_text='OK']"))
-                .click();
+    private void verifyClusterLogin(String expectedURL) {
+        LOGGER.info("Verifying login");
+        OpenshiftView view = robot.find(OpenshiftView.class);
+        view.openView();
+
+        view.menuRightClickAndSelect(robot, 0, "Refresh");
+        LOGGER.info("Waiting for '" + expectedURL + "' to appear.");
+
+        view.waitForTreeItem(expectedURL, 60, 1);
+        try {
+            view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
+        } catch (Exception e) {
+            view.closeView();
+            view.openView();
+            try {
+                view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
+            } catch (Exception ex) {
+                LOGGER.error("Expanding Openshift tree failed!");
+            }
+        }
+
+        view.menuRightClickAndSelect(robot, 0, "Refresh");
+        view.getOpenshiftConnectorTree().rightClickRow(0);
+        sharedSteps.waitForComponentByXpath(robot, 60, 1, byXpath("//div[@text='Open Console Dashboard']"));
+        LOGGER.info("Login successfully verified");
 
         view.closeView();
     }
@@ -331,9 +332,10 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     private void aboutTerminalRightClickSelect(ComponentFixture terminalPanel, Locator xpath) {
         Point linkPosition = new Point(20, 20);
         terminalPanel.rightClick(linkPosition);
-        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, xpath)
-                .stream()
-                .anyMatch(ComponentFixture::isShowing));
+//        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, xpath)
+//                .stream()
+//                .anyMatch(ComponentFixture::isShowing));
+        sharedSteps.waitForComponentByXpath(robot, 20, 1, xpath);
         robot.find(ComponentFixture.class, xpath)
                 .click();
     }

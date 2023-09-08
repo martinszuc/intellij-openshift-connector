@@ -55,9 +55,17 @@ public class ProjectUtility {
     }
 
     public static void selectNewProjectType(RemoteRobot robot, String projectType) {
-        ComponentFixture newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']"));
+        ComponentFixture newProjectTypeList;
+        try {
+             newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']"));
+        } catch (Exception e) {
+            robot.find(ComponentFixture.class, byXpath("//div[contains(@visible_text, 'Empty Project')]")).findText("Empty Project").click();
+            newProjectTypeList = robot.find(ComponentFixture.class, byXpath("JBList", "//div[@visible_text='Empty Project']"));
+
+        }
         newProjectTypeList.findText(projectType).click();
-    }
+
+        }
 
     public static void closeTipDialogIfItAppears(RemoteRobot robot) {
         try {

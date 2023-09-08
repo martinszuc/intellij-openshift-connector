@@ -3,7 +3,6 @@ package org.jboss.tools.intellij.openshift.test.ui.steps;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.search.locators.Locator;
-import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,65 +18,16 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 
 public class SharedSteps {
-    final private RemoteRobot robot;
+//    final private RemoteRobot robot;
     private static final String USER_HOME = System.getProperty("user.home");
     private static final Path CONFIG_FILE_PATH = getKubeConfigPath();
     private static final Path BACKUP_FILE_PATH = Paths.get(USER_HOME, ".kube", "config.bak");
     private static final Logger LOGGER = LoggerFactory.getLogger(SharedSteps.class);
 
-    public SharedSteps(RemoteRobot robot) {
-        this.robot = robot;
-    }
-
-    public void openLoginDialog(OpenshiftView view) {
-        LOGGER.info("Opening cluster login dialog");
-        view.openView();
-        menuRightClickAndSelect(view, 0, byXpath("//div[@text='Log in to cluster']"));
-        waitForComponentToAppear(20, 1, byXpath("//div[@text='Cluster URL:']"));
-    }
-
-    public void verifyClusterLogin(String expectedURL) {
-        LOGGER.info("Verifying login");
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        view.openView();
-
-        menuRightClickAndSelect(view, 0, byXpath("//div[@text='Refresh']"));
-        LOGGER.info("Waiting for '" + expectedURL + "' to appear.");
-
-        view.waitForTreeItem(expectedURL, 60, 1);
-        try {
-            view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
-        } catch (Exception e) {
-            view.closeView();
-            view.openView();
-            try {
-                view.getOpenshiftConnectorTree().expandAllExcept("Devfile registries");
-            } catch (Exception ex) {
-                LOGGER.error("Expanding Openshift tree failed!");
-            }
-        }
-
-        menuRightClickAndSelect(view, 0, byXpath("//div[@text='Refresh']"));
-        view.getOpenshiftConnectorTree().rightClickRow(0);
-        waitForComponentToAppear(60, 1, byXpath("//div[@text='Open Console Dashboard']"));
-        LOGGER.info("Login successfully verified");
-
-        view.closeView();
-    }
-
-    public void menuRightClickAndSelect(OpenshiftView view, int row, Locator xpath) {
-        view.getOpenshiftConnectorTree().clickRow(row);
-        view.getOpenshiftConnectorTree().rightClickRow(row);
-        waitForComponentToAppear(20, 1, xpath);
-        robot.find(ComponentFixture.class, xpath)
-                .click();
-    }
-
-    public void waitForComponentToAppear(int duration, int interval, Locator xpath) {
+    public void waitForComponentByXpath(RemoteRobot robot, int duration, int interval, Locator xpath) {
         waitFor(Duration.ofSeconds(duration), Duration.ofSeconds(interval), () -> robot.findAll(ComponentFixture.class, xpath)
                 .stream()
                 .anyMatch(ComponentFixture::isShowing));
-
     }
 
     public void removeKubeConfig() {
