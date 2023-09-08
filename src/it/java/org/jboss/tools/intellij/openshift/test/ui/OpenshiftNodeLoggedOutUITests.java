@@ -12,8 +12,6 @@ package org.jboss.tools.intellij.openshift.test.ui;
 
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.ContainerFixture;
-import com.intellij.remoterobot.fixtures.JButtonFixture;
-import com.intellij.remoterobot.fixtures.JTextFieldFixture;
 import com.intellij.remoterobot.search.locators.Locator;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ClusterLoginDialog;
 import org.jboss.tools.intellij.openshift.test.ui.steps.SharedSteps;
@@ -29,7 +27,6 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
@@ -120,7 +117,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
         assertTrue(robot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"))
                 .stream()
-                .anyMatch(ComponentFixture::isShowing));   // TODO these may be redundant
+                .anyMatch(ComponentFixture::isShowing));   // TODO these asserts may be redundant
 
         LOGGER.info("Closing cluster login dialog");
         clusterLoginDialog.close(robot);
@@ -180,19 +177,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
             fail("Test failed due to an error while selecting and copying text from the terminal");
         }
 
-        Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                String clipboardContents = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-                assert clipboardContents.contains("odo version");
-                assert clipboardContents.contains("unable to fetch the cluster server version");
-            } catch (UnsupportedFlavorException | IOException e) {
-                LOGGER.error("aboutLoggedOutTest failed: Copied text is not string!");
-            } catch (AssertionError e) {
-                LOGGER.error("aboutLoggedOutTest failed: Contents were not able to verify!");
-                fail("Test failed due to failed assertions");
-            }
-        }
+        verifyClipboardContent("odo version", "unable to fetch the cluster server version");
 
         robot.find(ComponentFixture.class, byXpath("//div[@class='ToolWindowHeader'][.//div[@class='ContentTabLabel']]//div[@myaction.key='tool.window.hide.action.name']"))
                 .click();
@@ -208,7 +193,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
         view.openView();
 
         view.menuRightClickAndSelect(robot, 0, "About");
-//        view.menuRightClickAndSelect(robot, 0, byXpath("//div[@text='About']"));
         sharedSteps.waitForComponentByXpath(robot, 20, 1, byXpath("//div[@class='JBTerminalPanel']"));
 
         ComponentFixture terminalPanel = robot.find(ComponentFixture.class, byXpath("//div[@class='JBTerminalPanel']"));
@@ -220,6 +204,7 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
             throw new RuntimeException(e);
         }
 
+        // Copy contents of terminal inside Run panel to clipboard.
         try {
             aboutTerminalRightClickSelect(terminalPanel, byXpath("//div[contains(@text.key, 'action.$SelectAll.text')]"));
             aboutTerminalRightClickSelect(terminalPanel, byXpath("//div[contains(@text.key, 'action.$Copy.text')]"));
@@ -228,25 +213,31 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
             fail("Test failed due to an error while selecting and copying text from the terminal");
         }
 
-        Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                String clipboardContents = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-                assert clipboardContents.contains("odo version");
-                assert clipboardContents.contains("Server:");
-            } catch (UnsupportedFlavorException | IOException e) {
-                LOGGER.error("aboutLoggedOutTest failed: Copied text is not string!");
-            } catch (AssertionError e) {
-                LOGGER.error("aboutLoggedOutTest failed: Contents were not able to verify!");
-                fail("Test failed due to failed assertions");
-            }
-        }
+        verifyClipboardContent("odo version", "Server:");
 
         robot.find(ComponentFixture.class, byXpath("//div[@class='ToolWindowHeader'][.//div[@class='ContentTabLabel']]//div[@myaction.key='tool.window.hide.action.name']"))
                 .click();
         logOut();
         view.closeView();
     }
+
+    private static void verifyClipboardContent(String... expectedContents) {
+        Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            try {
+                String clipboardContents = (String) transferable.getTransferData(DataFlavor.stringFlavor);
+                for (String expectedContent : expectedContents) {
+                    assert clipboardContents.contains(expectedContent);
+                }
+            } catch (UnsupportedFlavorException | IOException e) {
+                LOGGER.error("Test failed: Copied text is not string!");
+            } catch (AssertionError e) {
+                LOGGER.error("Test failed: Contents were not able to verify!");
+                fail("Test failed due to failed assertions");
+            }
+        }
+    }
+
 
     private void loginWithPasteCommand() {
         OpenshiftView view = robot.find(OpenshiftView.class);
@@ -292,7 +283,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
 
         clusterLoginDialog.insertURL(robot, CLUSTER_URL);
         clusterLoginDialog.insertToken(robot, CLUSTER_TOKEN);
-
         clusterLoginDialog.button("OK").click();
 
         currentClusterUrl = CLUSTER_URL;
@@ -332,9 +322,6 @@ public class OpenshiftNodeLoggedOutUITests extends AbstractBaseTest {
     private void aboutTerminalRightClickSelect(ComponentFixture terminalPanel, Locator xpath) {
         Point linkPosition = new Point(20, 20);
         terminalPanel.rightClick(linkPosition);
-//        waitFor(Duration.ofSeconds(20), () -> robot.findAll(ComponentFixture.class, xpath)
-//                .stream()
-//                .anyMatch(ComponentFixture::isShowing));
         sharedSteps.waitForComponentByXpath(robot, 20, 1, xpath);
         robot.find(ComponentFixture.class, xpath)
                 .click();

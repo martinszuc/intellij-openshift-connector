@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 
-import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 
 public class SharedSteps {
@@ -30,7 +29,7 @@ public class SharedSteps {
                 .anyMatch(ComponentFixture::isShowing));
     }
 
-    public void removeKubeConfig() {
+    public void removeKubeConfig() { // TODO i would maybe suggest move this method to common-ui-test-lib
         try {
             LOGGER.info("Attempting to delete kube config file");
             Files.deleteIfExists(CONFIG_FILE_PATH);
