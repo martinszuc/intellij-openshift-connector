@@ -1,0 +1,59 @@
+#!/usr/bin/env groovy
+package org.jboss.tools.intellij.openshift.test.ui
+
+node('rhel8') {
+
+    stage('Checkout repo') {
+        deleteDir()
+        git url: "https://github.com/${params.FORK}/intellij-openshift-connector.git", branch: "${params.BRANCH}"
+    }
+
+    stage('Clone and Build Common UI Test Library') {
+        dir('common-ui-test-library') {
+            git url: 'https://github.com/richard0202/intellij-common-ui-test-library.git', branch: '174'
+            sh './gradlew publishToMavenLocal'
+        }
+        dir('..') {
+        }
+    }
+
+    stage('Pre-login to cluster') {
+        sh 'oc login $CLUSTER_URL -u $CLUSTER_USER -p $CLUSTER_PASSWORD --insecure-skip-tls-verify'
+    }
+
+    stage('Copy idea.key') {            //   idea_licence_key
+        withCredentials([file(credentialsId: 'idea-key-file', variable: 'IDEA_KEY_FILE')]) {
+//            sh 'cp $IDEA_KEY_FILE idea_license_token/idea.key'
+            writeFile file: 'idea_license_token/idea.key', text: readFile(IDEA_KEY_FILE)
+        }
+    }
+
+
+//    stage('Copy idea.key') {            //   idea_licence_key
+//        withCredentials([string(credentialsId: 'idea-key', variable: 'IDEA_KEY')]) {
+//            writeFile file: 'idea_license_token/idea.key', text: env.IDEA_KEY
+//        }
+//    }
+
+
+    stage('Setup JDK') {
+        def jdkHome = tool 'openjdk-17'
+        env.JAVA_HOME = "${jdkHome}"
+        env.PATH = "${jdkHome}/bin:${env.PATH}"
+        sh '''
+            echo "JAVA_HOME: $JAVA_HOME"
+            java -version
+        '''
+    }
+
+    withEnv(['JUNIT_REPORT_PATH=report.xml']) {
+        stage('integration UI tests') {
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                wrap([$class: 'Xvnc']) {
+                    sh "./gradlew integrationUITest"
+                    junit 'report.xml'
+                }
+            }
+        }
+    }
+}
