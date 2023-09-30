@@ -21,6 +21,7 @@ import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatu
 import org.jboss.tools.intellij.openshift.test.ui.common.ImportProjectFromVersionControlFixture;
 import org.jboss.tools.intellij.openshift.test.ui.common.ProjectTreeFixture;
 
+import java.io.File;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
@@ -29,6 +30,7 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
  * @author Ondrej Dockal, Oleksii Korniienko, Ihor Okhrimenko
  */
 public class ProjectUtility {
+    public final static String PROJECT_LOCATION = System.getProperty("user.home") + File.separator + "IdeaProjects" + File.separator + "intellij-test-projects";
 
     public static void importProject(RemoteRobot robot, String projectName) {
         final ImportProjectFromVersionControlFixture importProjectFromVersionControlFixture = robot
@@ -45,8 +47,11 @@ public class ProjectUtility {
         flatWelcomeFrame.createNewProject();
         final NewProjectDialogWizard newProjectDialogWizard = flatWelcomeFrame.find(NewProjectDialogWizard.class, Duration.ofSeconds(20));
         selectNewProjectType(robot, "Empty Project");
-        JTextFieldFixture textField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='untitled']"));
-        textField.setText(projectName);
+
+        JTextFieldFixture nameTextField = robot.find(JTextFieldFixture.class, byXpath("//div[@visible_text='untitled']"));
+        nameTextField.setText(projectName);
+        JTextFieldFixture locationTextField = robot.find(JTextFieldFixture.class, byXpath("//div[@class='ExtendableTextField']"));
+        locationTextField.setText(PROJECT_LOCATION);
         newProjectDialogWizard.finish();
 
         final IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
