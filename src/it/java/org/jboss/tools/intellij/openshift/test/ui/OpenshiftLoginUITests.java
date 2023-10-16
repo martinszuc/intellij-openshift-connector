@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.test.ui;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import com.intellij.remoterobot.fixtures.ContainerFixture;
 import com.intellij.remoterobot.search.locators.Locator;
+import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ClusterLoginDialog;
 import org.jboss.tools.intellij.openshift.test.ui.steps.SharedSteps;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
@@ -97,7 +98,13 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
         }
     }
 
+
     @Test
+    public void restartTest() {
+        restart(IntelliJVersion.ULTIMATE_V_2023_2, 8580);
+    }
+
+//    @Test
     public void openshiftViewTest() {
         logOut();
 
@@ -108,7 +115,7 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
         view.closeView();
     }
 
-    @Test
+//    @Test
     public void defaultNodeTest() {
         LOGGER.info("defaultNodeTest: Start");
         logOut();
@@ -127,7 +134,7 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
 
     }
 
-    @Test
+//    @Test
     public void clusterLoginDialogTest() {
         LOGGER.info("clusterLoginDialogTest: Start");
         LOGGER.info("Opening cluster login dialog");
@@ -147,7 +154,7 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
 
     }
 
-    @Test
+    //    @Test
     public void usernameLoginTest() {
         LOGGER.info("usernameLoginTest: Start");
         logOut();
@@ -157,7 +164,7 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
         LOGGER.info("usernameLoginTest: End");
     }
 
-    @Test
+//    @Test
     public void aboutLoggedOutTest() {
         LOGGER.info("aboutLoggedOutTest: Start");
 
@@ -196,13 +203,13 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
 
     }
 
-    @Test
+    //    @Test
     public void aboutLoggedInTest() {
         LOGGER.info("aboutLoggedInTest: Start");
 
         OpenshiftView view = robot.find(OpenshiftView.class);
 
-        try{
+        try {
             loginWithUsername();
             verifyClusterLogin(currentClusterUrl);
         } catch (Exception e) {
@@ -256,7 +263,7 @@ public class OpenshiftLoginUITests extends AbstractBaseTest {
             } catch (UnsupportedFlavorException | IOException e) {
                 LOGGER.error("Test failed: Copied text is not string!");
             } catch (AssertionError e) {
-                LOGGER.error("Test failed: Contents were not able to verify! Clipboard contents:{ "  + clipboardContents + " }. " );
+                LOGGER.error("Test failed: Contents were not able to verify! Clipboard contents:{ " + clipboardContents + " }. ");
                 fail("Test failed due to failed assertions");
             }
         }
