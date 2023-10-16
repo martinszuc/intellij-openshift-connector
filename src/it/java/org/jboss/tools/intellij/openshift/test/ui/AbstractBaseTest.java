@@ -14,6 +14,7 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import com.redhat.devtools.intellij.commonuitest.utils.runner.IntelliJVersion;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
@@ -50,6 +51,12 @@ abstract public class AbstractBaseTest {
         }
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
         ideStatusBar.waitUntilAllBgTasksFinish();
+    }
+
+    protected static void restart(IntelliJVersion ideaVersion, int portNumber) {
+        robot = IdeaRunner.getInstance().restartIDE(ideaVersion, portNumber);
+        hasConnectedToTestIDE = false;
+        connect();
     }
 
     public RemoteRobot getRobotReference() {

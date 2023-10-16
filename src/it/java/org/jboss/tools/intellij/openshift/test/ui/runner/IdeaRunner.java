@@ -44,8 +44,12 @@ public class IdeaRunner {
 		}
 	}
 
-	public RemoteRobot getRemoteRobot() {
-		return robot;
-	}
+    public RemoteRobot restartIDE(IntelliJVersion ideaVersion, int portNumber) {
+        return UITestRunner.restartIde(ideaVersion, portNumber);
+    }
+
+    public RemoteRobot getRemoteRobot() {
+        return robot;
+    }
 
 }
