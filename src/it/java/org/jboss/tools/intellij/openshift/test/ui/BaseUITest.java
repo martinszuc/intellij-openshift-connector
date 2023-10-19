@@ -73,7 +73,7 @@ public class BaseUITest extends AbstractBaseTest {
 		GettingStartedView view = robot.find(GettingStartedView.class);
 		view.openView();
 
-		view.maximalizeToolWindow(robot);
+		view.maximalizeToolWindow(robot, byXpath("//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']"));
 
 		view.getGettingStartedTree().findText("Login/Provision OpenShift cluster").click();
 		assertFalse(view.findEditorPaneFixture().findAllText().isEmpty(), "Login/Provision OpenShift cluster item has empty description!");
