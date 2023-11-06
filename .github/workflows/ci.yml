@@ -6,14 +6,14 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ main ]
-  pull_request:
+  pull_request_target:
     branches: [ main ]
 
 jobs:
   configure_sonar:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
+    if: github.event_name == 'pull_request_target'
+
     steps:
       - name: Save Sonar config on PR
         run: |
