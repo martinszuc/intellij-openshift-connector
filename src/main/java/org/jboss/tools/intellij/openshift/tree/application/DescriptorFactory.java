@@ -14,6 +14,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.redhat.devtools.intellij.common.tree.LabelAndIconDescriptor;
+import org.jboss.tools.intellij.openshift.ui.helm.ChartIcons;
 import org.jboss.tools.intellij.openshift.utils.odo.Binding;
 import org.jboss.tools.intellij.openshift.utils.odo.Component;
 import org.jboss.tools.intellij.openshift.utils.odo.Odo;
@@ -35,8 +36,6 @@ public class DescriptorFactory {
   private static final Icon STARTER_ICON = IconLoader.findIcon("/images/start-project-light.png", ApplicationsTreeStructure.class);
   private static final Icon REGISTRY_ICON = IconLoader.findIcon("/images/registry.svg", ApplicationsTreeStructure.class);
 
-  private static final Icon CHART_RELEASE_ICON = IconLoader.findIcon("/images/helm/helm.svg", ApplicationsTreeStructure.class);
-
   public static @NotNull NodeDescriptor<?> create(@NotNull Object element, @Nullable NodeDescriptor parentDescriptor, @NotNull ApplicationsTreeStructure structure, @NotNull Project project) {
     if (element == structure) {
       return new LabelAndIconDescriptor<>(
@@ -51,13 +50,17 @@ public class DescriptorFactory {
         project,
         root,
         () -> {
-          String label = "Loading...";
           try {
             Odo odo = root.getOdo().getNow(null);
-            if (odo != null) {
-              label = odo.getMasterUrl().toString();
+            if (odo == null) {
+              return "Loading...";
             }
-            return label;
+            java.net.URL masterUrl = odo.getMasterUrl();
+            if ("kubernetes.default.svc".equals(masterUrl.getHost())) {
+              return "no (current) context/cluster set";
+            } else {
+              return masterUrl.toString();
+            }
           } catch (Exception e) {
             return "Error: " + e.getCause().getMessage();
           }
@@ -154,7 +157,7 @@ public class DescriptorFactory {
         releaseNode,
         releaseNode::getName,
         () -> "Helm Release",
-        () -> CHART_RELEASE_ICON,
+        () -> ChartIcons.getIcon15x15(releaseNode.getRelease()),
         parentDescriptor);
     }
 

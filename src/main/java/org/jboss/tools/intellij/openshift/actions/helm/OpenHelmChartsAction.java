@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 public class OpenHelmChartsAction extends HelmAction {
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
+    public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Helm helm) {
         Project project = getEventProject(anActionEvent);
         ChartsDialog dialog = new ChartsDialog((ApplicationsRootNode) selected, helm, project);
         sendTelemetryResults(TelemetryService.TelemetryResult.SUCCESS);
@@ -36,6 +36,7 @@ public class OpenHelmChartsAction extends HelmAction {
 
     @Override
     public boolean isVisible(Object selected) {
-        return selected.getClass() == ApplicationsRootNode.class;
+        return (selected instanceof ApplicationsRootNode)
+          && ((ApplicationsRootNode) selected).isLogged();
     }
 }

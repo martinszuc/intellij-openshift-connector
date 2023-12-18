@@ -26,23 +26,28 @@ import com.intellij.openapi.util.Key;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterHelper;
 import com.redhat.devtools.intellij.common.kubernetes.ClusterInfo;
+import com.redhat.devtools.intellij.common.utils.ConfigHelper;
 import com.redhat.devtools.intellij.common.utils.ExecHelper;
 import com.redhat.devtools.intellij.common.utils.NetworkUtils;
+import com.redhat.devtools.intellij.kubernetes.model.client.ssl.IDEATrustManager;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder;
+import io.fabric8.kubernetes.api.Pluralize;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
-import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
+import io.fabric8.kubernetes.client.internal.SSLUtils;
 import io.fabric8.kubernetes.model.Scope;
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.OpenShiftOperatorHubAPIGroupDSL;
 import io.fabric8.openshift.client.impl.OpenShiftOperatorHubAPIGroupClient;
@@ -56,6 +61,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +72,11 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,6 +84,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -111,12 +125,11 @@ public class OdoCli implements Odo {
 
     private Map<String, String> envVars;
 
-    private String namespace;
+    private String currentNamespace;
 
     private final AtomicBoolean swaggerLoaded = new AtomicBoolean();
 
     private JSonParser swagger;
-
     /*
      Map of process launched for feature (dev, debug,...) related.
      Key is component name
@@ -135,7 +148,9 @@ public class OdoCli implements Odo {
         this.command = command;
         this.project = project;
         this.connection = ApplicationManager.getApplication().getMessageBus().connect();
-        this.client = new KubernetesClientBuilder().build();
+        String current = ConfigHelper.getCurrentContextName();
+        Config config = Config.autoConfigure(current);
+        this.client = new KubernetesClientBuilder().withConfig(config).withHttpClientBuilderConsumer(builder -> setSslContext(builder, config)).build();
         try {
             this.envVars = NetworkUtils.buildEnvironmentVariables(this.getMasterUrl().toString());
             computeTelemetrySettings();
@@ -154,6 +169,17 @@ public class OdoCli implements Odo {
                 computeTelemetrySettings();
             }
         };
+    }
+
+    private void setSslContext(HttpClient.Builder builder, Config config) {
+        try {
+            List<X509ExtendedTrustManager> clientTrustManagers = Arrays.stream(SSLUtils.trustManagers(config)).filter(X509ExtendedTrustManager.class::isInstance).map(X509ExtendedTrustManager.class::cast).collect(Collectors.toList());
+            X509TrustManager externalTrustManager = new IDEATrustManager().configure(clientTrustManagers.toArray(new X509ExtendedTrustManager[0]));
+            builder.sslContext(SSLUtils.keyManagers(config), List.of(externalTrustManager).toArray(new TrustManager[0]));
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException |
+                 UnrecoverableKeyException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void computeTelemetrySettings() {
@@ -188,7 +214,6 @@ public class OdoCli implements Odo {
         }
     }
 
-
     private ObjectMapper configureObjectMapper(final StdNodeBasedDeserializer<? extends List<?>> deserializer) {
         final SimpleModule module = new SimpleModule();
         module.addDeserializer(List.class, deserializer);
@@ -198,51 +223,55 @@ public class OdoCli implements Odo {
     @Override
     public List<String> getNamespaces() throws IOException {
         try {
-            if (isOpenShift()) {
-                return client.adapt(OpenShiftClient.class).projects().list().getItems().stream().
-                        map(p -> p.getMetadata().getName()).collect(Collectors.toList());
-            } else {
-                return client.namespaces().list().getItems().stream().
-                        map(p -> p.getMetadata().getName()).collect(Collectors.toList());
-            }
+            return getNamespaces(client).stream()
+              .map(resource -> resource.getMetadata().getName())
+              .collect(Collectors.toList());
         } catch (KubernetesClientException e) {
             throw new IOException(e);
         }
     }
 
-    protected String validateNamespace(String ns) {
-        if (Strings.isNullOrEmpty(ns)) {
-            ns = "default";
-        }
-        try {
-            if (isOpenShift()) {
-                client.adapt(OpenShiftClient.class).projects().withName(ns).get();
-            } else {
-                client.namespaces().withName(ns).get();
-            }
-        } catch (KubernetesClientException e) {
-            ns = "";
-            if (isOpenShift()) {
-                List<Project> projects = client.adapt(OpenShiftClient.class).projects().list().getItems();
-                if (!projects.isEmpty()) {
-                    ns = projects.get(0).getMetadata().getName();
-                }
-            } else {
-                List<Namespace> namespaces = client.namespaces().list().getItems();
-                if (!namespaces.isEmpty()) {
-                    ns = namespaces.get(0).getMetadata().getName();
+    private List<? extends HasMetadata> getNamespaces(KubernetesClient client) {
+        if (isOpenShift()) {
+            try (OpenShiftClient osClient = toOpenShiftClient()) {
+                if (osClient != null) {
+                    return osClient.projects().list().getItems();
                 }
             }
         }
-        return ns;
+        return client.namespaces().list().getItems();
     }
 
     @Override
-    public String getNamespace() {
-        if (namespace == null) {
-            namespace = validateNamespace(client.getNamespace());
+    public String getCurrentNamespace() {
+        if (currentNamespace == null) {
+            currentNamespace = validateNamespace(client.getNamespace());
         }
-        return "".equals(namespace) ? null : namespace;
+        return currentNamespace;
+    }
+
+    protected String validateNamespace(String namespace) {
+        if (Strings.isNullOrEmpty(namespace)) {
+            namespace = "default";
+        }
+        List<? extends HasMetadata> namespaces = getNamespaces(client);
+        return getByNameOrFirst(namespace, namespaces);
+    }
+
+    private String getByNameOrFirst(String name, List<? extends HasMetadata> namespaces) {
+        if (namespaces.isEmpty()) {
+            return null;
+        }
+        Optional<? extends HasMetadata> matching = namespaces.stream()
+          .filter(namespace -> name.equals(namespace.getMetadata().getName()))
+          .findFirst();
+        HasMetadata namespace = null;
+        if (matching.isPresent()) {
+            namespace = matching.get();
+        } else {
+            namespace = namespaces.get(0);
+        }
+        return namespace.getMetadata().getName();
     }
 
     private static String execute(@NotNull File workingDirectory, String command, Map<String, String> envs, String... args) throws IOException {
@@ -395,7 +424,7 @@ public class OdoCli implements Odo {
                 .withGroup(group)
                 .withScope(Scope.NAMESPACED.value())
                 .withKind(service.getKind())
-                .withPlural(service.getKind().toLowerCase() + "s")
+                .withPlural(Pluralize.toPlural(service.getKind().toLowerCase()))
                 .withVersion(version)
                 .build();
     }
@@ -631,7 +660,7 @@ public class OdoCli implements Odo {
             if (follow) {
                 args.add("--follow");
             }
-            if (StringUtils.isNotBlank(platform)){
+            if (StringUtils.isNotBlank(platform)) {
                 args.add("--platform");
                 args.add(platform);
             }
@@ -682,14 +711,14 @@ public class OdoCli implements Odo {
 
     @Override
     public void createProject(String project) throws IOException {
-        execute(command, envVars, "create", "namespace", project, "-w");
+        execute(command, envVars, "create", NAMESPACE_FIELD, project, "-w");
     }
 
     @Override
     public void deleteProject(String project) throws IOException {
-        execute(command, envVars, "delete", "namespace", project, "-f", "-w");
-        if (project.equals(namespace)) {
-            namespace = null;
+        execute(command, envVars, "delete", NAMESPACE_FIELD, project, "-f", "-w");
+        if (project.equals(currentNamespace)) {
+            currentNamespace = null;
         }
     }
 
@@ -836,7 +865,7 @@ public class OdoCli implements Odo {
 
     @Override
     public boolean isOpenShift() {
-        return ClusterHelper.getClusterInfo(client).isOpenshift();
+        return ClusterHelper.isOpenShift(client);
     }
 
     @Override

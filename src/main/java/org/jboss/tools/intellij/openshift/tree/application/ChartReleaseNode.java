@@ -12,7 +12,8 @@ package org.jboss.tools.intellij.openshift.tree.application;
 
 import org.jboss.tools.intellij.openshift.utils.helm.ChartRelease;
 
-public class ChartReleaseNode extends ParentableNode<NamespaceNode> {
+public class ChartReleaseNode extends BaseNode<NamespaceNode> {
+
   private final ChartRelease release;
 
   public ChartReleaseNode(NamespaceNode parent, ChartRelease release) {
@@ -20,7 +21,7 @@ public class ChartReleaseNode extends ParentableNode<NamespaceNode> {
     this.release = release;
   }
 
-  public ChartRelease getChartRelease() {
+  public ChartRelease getRelease() {
     return release;
   }
 }
