@@ -16,8 +16,12 @@ public class XPathConstants {
     public static final String JTEXT_FIELD = "//div[@class='JTextField']";
     public static final String JPASSWORD_FIELD = "//div[@class='JPasswordField']";
     public static final String CLUSTER_LOGIN_DIALOG = "//div[@accessiblename='Cluster login' and @class='MyDialog']";
+    public static final String TREE_CLASS = "//div[@class='Tree']";
 
-    public static String toolWindowButton(String label) {
+    public static String getToolWindowButton(String label) {
         return "//div[@tooltiptext='" + label + "']";
+    }
+    public static String getTextXPath(String selection) {
+        return "//div[@text='" + selection + "']";
     }
 }
