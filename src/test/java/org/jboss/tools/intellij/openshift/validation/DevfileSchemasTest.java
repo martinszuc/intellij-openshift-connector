@@ -11,20 +11,25 @@
 package org.jboss.tools.intellij.openshift.validation;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import com.redhat.devtools.intellij.common.utils.VfsRootAccessHelper;
 import org.jetbrains.yaml.schema.YamlJsonSchemaHighlightingInspection;
 
-import java.io.File;
+import java.util.Collections;
+
 
 public class DevfileSchemasTest extends BasePlatformTestCase {
 
-    public void testQuarkusDevfile() {
-        myFixture.setTestDataPath("src/test/resources");
-        myFixture.enableInspections(YamlJsonSchemaHighlightingInspection.class);
-        String path = new File("src").getAbsoluteFile().getParentFile().getAbsolutePath();
-        VfsRootAccessHelper.allowRootAccess(path);
-        myFixture.configureByFile("devfiles/java-quarkus.yaml");
-        myFixture.checkHighlighting();
-    }
+  public void testQuarkusDevfile() {
+    myFixture.setTestDataPath("src/test/resources");
+    myFixture.enableInspections(Collections.singletonList(YamlJsonSchemaHighlightingInspection.class));
+    myFixture.configureByFile("devfiles/java-quarkus-v200.yaml");
+    myFixture.checkHighlighting();
+  }
+
+  public void testPythonDevfile() {
+    myFixture.setTestDataPath("src/test/resources");
+    myFixture.enableInspections(Collections.singletonList(YamlJsonSchemaHighlightingInspection.class));
+    myFixture.configureByFile("devfiles/sample-python-v220.yaml");
+    myFixture.checkHighlighting();
+  }
 
 }

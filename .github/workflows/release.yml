@@ -5,10 +5,20 @@ concurrency: release
 
 on:
   workflow_dispatch:
+    inputs:
+      publishToMarketPlace:
+        description: 'Publish to JetBrains Marketplace ?'
+        required: true
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+        default: 'false'
 
 jobs:
   # Prepare and publish the plugin to JetBrains Marketplace repository
   release:
+    if: ${{ inputs.publishToMarketPlace == 'true' }}
     name: Publish to Marketplace
     runs-on: ubuntu-latest
     permissions:
@@ -21,7 +31,7 @@ jobs:
 
       # Validate Wrapper before running build
       - name: validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2 #v2.1.1
+        uses: gradle/actions/wrapper-validation@6cec5d49d4d6d4bb982fbed7047db31ea6d38f11 #v3.3.0
 
       # Set up Java environment for the next steps
       - name: Setup Java
@@ -32,7 +42,7 @@ jobs:
 
       # Setup Gradle
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 #v3.1.0
+        uses: gradle/actions/setup-gradle@6cec5d49d4d6d4bb982fbed7047db31ea6d38f11 #v3.3.0
         with:
           gradle-home-cache-cleanup: true
 

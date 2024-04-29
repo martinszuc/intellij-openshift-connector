@@ -21,7 +21,7 @@ public class HelmCliSearchTest extends HelmCliTest {
         // when
         List<Chart> charts = helm.search();
         // then
-        assertTrue(charts.size() > 0);
+      assertFalse(charts.isEmpty());
     }
 
     public void testSearch_should_list_kuberos() throws IOException {
