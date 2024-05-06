@@ -73,12 +73,16 @@ public abstract class AbstractBaseTest {
 
     protected static void logOut() {
         KubeConfigUtility.removeKubeConfig();
-        currentClusterUrl = DEFAULT_CLUSTER_URL;
         sleep(2000);
+        currentClusterUrl = DEFAULT_CLUSTER_URL;
+
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
         view.refreshTree(robot);
-        sleep(2000);
+
+        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+        ideStatusBar.waitUntilAllBgTasksFinish();
+
         view.closeView();
     }
 
