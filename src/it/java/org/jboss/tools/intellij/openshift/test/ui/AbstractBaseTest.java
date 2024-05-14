@@ -23,6 +23,7 @@ import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.jboss.tools.intellij.openshift.test.ui.utils.CleanUpUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.KubeConfigUtility;
+import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
@@ -78,6 +79,7 @@ public abstract class AbstractBaseTest {
 
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
+        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,120,5); // Wait for "loading..." to finish
         view.refreshTree(robot);
 
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
