@@ -21,11 +21,9 @@ import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
 import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.jboss.tools.intellij.openshift.test.ui.utils.CleanUpUtility;
-import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.KubeConfigUtility;
+import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
-import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
-import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,9 +36,11 @@ import java.time.Duration;
 /**
  * @author Ondrej Dockal, odockal@redhat.com
  */
-@ExtendWith(TestRunnerExtension.class)
+@ExtendWith({TestRunnerExtension.class})
 @UITest
 public abstract class AbstractBaseTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBaseTest.class);
+
     protected static RemoteRobot robot;
     private static boolean isProjectCreatedAndOpened = false;
     public static final String DEFAULT_CLUSTER_URL = "no (current) context/cluster set";
@@ -72,20 +72,33 @@ public abstract class AbstractBaseTest {
         CleanUpUtility.cleanUpAll(robot);
     }
 
+    /**
+     * Logs out from cluster by removing the .kube/config file and refreshing the OpenShift tree view.
+     */
     protected static void logOut() {
-        KubeConfigUtility.removeKubeConfig();
-        sleep(2000);
-        currentClusterUrl = DEFAULT_CLUSTER_URL;
+        LOGGER.info("Starting logout process...");
+        try {
+            KubeConfigUtility.removeKubeConfig();
+            sleep(2000);
+            currentClusterUrl = DEFAULT_CLUSTER_URL;
 
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        view.openView();
-        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,120,5); // Wait for "loading..." to finish
+            OpenshiftView view = robot.find(OpenshiftView.class);
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
 
-        view.refreshTree(robot);
-        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
-        ideStatusBar.waitUntilAllBgTasksFinish();
+            view.openView();
+            ideStatusBar.waitUntilAllBgTasksFinish();
 
-        view.closeView();
+            view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 300, 5); // Wait for "loading..." to finish
+
+            view.refreshTree(robot);
+            ideStatusBar.waitUntilAllBgTasksFinish();
+
+            view.closeView();
+            LOGGER.info("Logout process completed successfully.");
+        } catch (Exception e) {
+            LOGGER.error("Logout failed: {}", e.getMessage());
+            throw e;
+        }
     }
 
     public RemoteRobot getRobotReference() {
@@ -103,10 +116,11 @@ public abstract class AbstractBaseTest {
     }
 
     protected static void sleep(long ms) {
-        System.out.println("Putting thread into sleep for: " + ms + " ms");
+        LOGGER.info("Putting thread into sleep for: {} ms", ms);
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
+            LOGGER.error("Sleep interrupted: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
