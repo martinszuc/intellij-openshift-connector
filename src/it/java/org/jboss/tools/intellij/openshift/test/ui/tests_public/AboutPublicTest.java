@@ -35,7 +35,7 @@ import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathCo
  * @author Martin Szuc
  * Test class verifying functionality of About button when right-clicked on cluster URL item in Openshift view
  */
-public class AboutPublicTest extends AbstractPublicTest {
+public class AboutPublicTest extends AbstractBaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AboutPublicTest.class);
 
     @Test

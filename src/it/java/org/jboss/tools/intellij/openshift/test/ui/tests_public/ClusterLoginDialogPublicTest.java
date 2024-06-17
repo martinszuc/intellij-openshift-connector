@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Martin Szuc
  * Test class verifying functionality of cluster login dialog
  */
-public class ClusterLoginDialogPublicTest extends AbstractPublicTest {
+public class ClusterLoginDialogPublicTest extends AbstractBaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterLoginDialogPublicTest.class);
 
