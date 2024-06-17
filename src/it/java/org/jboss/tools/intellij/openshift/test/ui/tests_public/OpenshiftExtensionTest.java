@@ -13,7 +13,10 @@ package org.jboss.tools.intellij.openshift.test.ui.tests_public;
 import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +30,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * @author Ihor Okhrimenko, Ondrej Dockal
  * Test class verifying presence of tested extensions, OpenShift view and it's content
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OpenshiftExtensionTest extends AbstractPublicTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenshiftExtensionTest.class);
 
     @Test
+    @Order(1)
     public void openshiftExtensionTest() {
         waitFor(Duration.ofSeconds(10),
                 Duration.ofSeconds(1),
@@ -50,7 +55,9 @@ public class OpenshiftExtensionTest extends AbstractPublicTest {
     }
 
     @Test
+    @Order(2)
     public void openshiftViewTest() {
+        logOut();
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
         view.waitForTreeItem(DEFAULT_CLUSTER_URL, 10, 1);
@@ -58,6 +65,7 @@ public class OpenshiftExtensionTest extends AbstractPublicTest {
     }
 
     @Test
+    @Order(3)
     public void defaultNodeTest() {
         LOGGER.info("defaultNodeTest: Start");
         OpenshiftView view = robot.find(OpenshiftView.class);
