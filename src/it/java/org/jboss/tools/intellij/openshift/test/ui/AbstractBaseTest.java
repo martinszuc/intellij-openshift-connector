@@ -41,6 +41,8 @@ import java.time.Duration;
 @ExtendWith(TestRunnerExtension.class)
 @UITest
 public abstract class AbstractBaseTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBaseTest.class);
+
     protected static RemoteRobot robot;
     private static boolean isProjectCreatedAndOpened = false;
     public static final String DEFAULT_CLUSTER_URL = "no (current) context/cluster set";
@@ -73,20 +75,49 @@ public abstract class AbstractBaseTest {
     }
 
     protected static void logOut() {
+        LOGGER.info("Starting logout process...");
+
+        // Remove KubeConfig
+        LOGGER.info("Removing KubeConfig...");
         KubeConfigUtility.removeKubeConfig();
-        sleep(2000);
+        LOGGER.info("KubeConfig removed.");
+
+        // Sleep to ensure the removal is processed
+        LOGGER.info("Sleeping for 10 seconds to ensure KubeConfig removal is processed...");
+        sleep(10000);
+
         currentClusterUrl = DEFAULT_CLUSTER_URL;
 
         OpenshiftView view = robot.find(OpenshiftView.class);
-        view.openView();
-        view.waitForTreeItem(DEFAULT_CLUSTER_URL,300,5); // Wait for "loading..." to finish
+        LOGGER.info("Found OpenshiftView component.");
 
+        // Open Openshift view
+        view.openView();
+        LOGGER.info("Opened Openshift view.");
+
+        // Wait for the default cluster URL to appear
+        LOGGER.info("Waiting for DEFAULT_CLUSTER_URL to appear...");
+        view.waitForTreeItem(DEFAULT_CLUSTER_URL, 300, 5); // Wait for "loading..." to finish
+        LOGGER.info("DEFAULT_CLUSTER_URL appeared.");
+
+        // Refresh the Openshift view tree
+        LOGGER.info("Refreshing Openshift view tree...");
         view.refreshTree(robot);
+        LOGGER.info("Openshift view tree refreshed.");
+
+        // Wait until all background tasks finish
+        LOGGER.info("Waiting for all background tasks to finish...");
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
         ideStatusBar.waitUntilAllBgTasksFinish();
+        LOGGER.info("All background tasks finished.");
 
+        // Close Openshift view
         view.closeView();
+        LOGGER.info("Closed Openshift view.");
+
+        LOGGER.info("Logout process completed.");
     }
+
 
     public RemoteRobot getRobotReference() {
         return robot;
