@@ -37,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -80,47 +82,52 @@ public abstract class AbstractBaseTest {
     }
 
     protected static void logOut() {
-        LOGGER.info("Starting logout process...");
+        try {
+            LOGGER.info("Starting logout process...");
 
-        // Remove KubeConfig
-        LOGGER.info("Removing KubeConfig...");
-        KubeConfigUtility.removeKubeConfig();
-        LOGGER.info("KubeConfig removed.");
+            KubeConfigUtility.removeKubeConfig();
+            sleep(10000);
+            currentClusterUrl = DEFAULT_CLUSTER_URL;
 
-        // Sleep to ensure the removal is processed
-        LOGGER.info("Sleeping for 10 seconds to ensure KubeConfig removal is processed...");
-        sleep(10000);
+            OpenshiftView view = robot.find(OpenshiftView.class);
+            view.openView();
+            view.waitForTreeItem(DEFAULT_CLUSTER_URL, 300, 5); // Wait for "loading..." to finish
 
-        currentClusterUrl = DEFAULT_CLUSTER_URL;
+            view.refreshTree(robot);
 
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        LOGGER.info("Found OpenshiftView component.");
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+            ideStatusBar.waitUntilAllBgTasksFinish();
 
-        // Open Openshift view
-        view.openView();
-        LOGGER.info("Opened Openshift view.");
+            // Close Openshift view
+            view.closeView();
 
-        // Wait for the default cluster URL to appear
-        LOGGER.info("Waiting for DEFAULT_CLUSTER_URL to appear...");
-        view.waitForTreeItem(DEFAULT_CLUSTER_URL, 300, 5); // Wait for "loading..." to finish
-        LOGGER.info("DEFAULT_CLUSTER_URL appeared.");
+            LOGGER.info("Logout process completed.");
+        } catch (Exception e) {
+            if (e.getCause() instanceof SocketTimeoutException) {
+                LOGGER.error("SocketTimeoutException during logout process", e);
+                captureScreenshot("LogoutFailure");
+                sleep(30000);
+                robot = IdeaRunner.getInstance().getRemoteRobot();
+                logOut();
+            } else {
+                LOGGER.error("Exception during logout process", e);
+                captureScreenshot("LogoutFailure");
+                throw e;
+            }
+        }
+    }
 
-        // Refresh the Openshift view tree
-        LOGGER.info("Refreshing Openshift view tree...");
-        view.refreshTree(robot);
-        LOGGER.info("Openshift view tree refreshed.");
-
-        // Wait until all background tasks finish
-        LOGGER.info("Waiting for all background tasks to finish...");
-        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
-        ideStatusBar.waitUntilAllBgTasksFinish();
-        LOGGER.info("All background tasks finished.");
-
-        // Close Openshift view
-        view.closeView();
-        LOGGER.info("Closed Openshift view.");
-
-        LOGGER.info("Logout process completed.");
+    private static void captureScreenshot(String name) {
+        try {
+            File screenshot = ScreenshotUtils.takeScreenshot(robot, name);
+            if (screenshot != null) {
+                LOGGER.info("Screenshot saved: " + screenshot.getAbsolutePath());
+            } else {
+                LOGGER.error("Failed to take screenshot");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Exception while taking screenshot", e);
+        }
     }
 
 
