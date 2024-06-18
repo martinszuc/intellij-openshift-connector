@@ -32,11 +32,6 @@ public class OpenshiftExtensionTest extends AbstractPublicTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenshiftExtensionTest.class);
 
-    @BeforeAll
-    public static void logoutOnceBeforeAllTests() {
-        logOut();
-    }
-
     @Test
     @Order(1)
     public void openshiftExtensionTest() {
