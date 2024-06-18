@@ -16,6 +16,7 @@ import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFra
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import com.redhat.devtools.intellij.commonuitest.utils.project.CreateCloseUtils;
+import com.redhat.devtools.intellij.commonuitest.utils.screenshot.ScreenshotUtils;
 import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
@@ -30,15 +31,19 @@ import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.time.Duration;
+import java.util.Optional;
 
 /**
  * @author Ondrej Dockal, odockal@redhat.com
  */
-@ExtendWith(TestRunnerExtension.class)
+@ExtendWith({TestRunnerExtension.class, AbstractBaseTest.ScreenshotTestWatcher.class})
 @UITest
 public abstract class AbstractBaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBaseTest.class);
@@ -139,6 +144,33 @@ public abstract class AbstractBaseTest {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    static class ScreenshotTestWatcher implements TestWatcher {
+        @Override
+        public void testFailed(ExtensionContext context, Throwable cause) {
+            File screenshot = ScreenshotUtils.takeScreenshot(robot);
+            if (screenshot != null) {
+                LOGGER.info("Screenshot saved: " + screenshot.getAbsolutePath());
+            } else {
+                LOGGER.error("Failed to take screenshot");
+            }
+        }
+
+        @Override
+        public void testSuccessful(ExtensionContext context) {
+            // No-op
+        }
+
+        @Override
+        public void testAborted(ExtensionContext context, Throwable cause) {
+            // No-op
+        }
+
+        @Override
+        public void testDisabled(ExtensionContext context, Optional<String> reason) {
+            // No-op
         }
     }
 }
