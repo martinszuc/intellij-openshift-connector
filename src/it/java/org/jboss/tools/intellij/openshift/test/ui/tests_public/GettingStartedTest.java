@@ -81,4 +81,9 @@ public class GettingStartedTest extends AbstractPublicTest {
 
         view.closeView();
     }
+
+    @AfterAll
+    public static void logoutOnceBeforeAllTests() {
+        logOut();
+    }
 }

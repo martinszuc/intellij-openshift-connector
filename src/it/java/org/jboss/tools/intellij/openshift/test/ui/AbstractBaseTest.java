@@ -80,47 +80,66 @@ public abstract class AbstractBaseTest {
     }
 
     protected static void logOut() {
-        LOGGER.info("Starting logout process...");
+        try {
+            LOGGER.info("Starting logout process...");
 
-        // Remove KubeConfig
-        LOGGER.info("Removing KubeConfig...");
-        KubeConfigUtility.removeKubeConfig();
-        LOGGER.info("KubeConfig removed.");
+            // Remove KubeConfig
+            LOGGER.info("Removing KubeConfig...");
+            KubeConfigUtility.removeKubeConfig();
+            LOGGER.info("KubeConfig removed.");
 
-        // Sleep to ensure the removal is processed
-        LOGGER.info("Sleeping for 10 seconds to ensure KubeConfig removal is processed...");
-        sleep(10000);
+            // Sleep to ensure the removal is processed
+            LOGGER.info("Sleeping for 10 seconds to ensure KubeConfig removal is processed...");
+            sleep(10000);
 
-        currentClusterUrl = DEFAULT_CLUSTER_URL;
+            currentClusterUrl = DEFAULT_CLUSTER_URL;
 
-        OpenshiftView view = robot.find(OpenshiftView.class);
-        LOGGER.info("Found OpenshiftView component.");
+            OpenshiftView view = robot.find(OpenshiftView.class);
+            LOGGER.info("Found OpenshiftView component.");
 
-        // Open Openshift view
-        view.openView();
-        LOGGER.info("Opened Openshift view.");
+            // Open Openshift view
+            view.openView();
+            LOGGER.info("Opened Openshift view.");
 
-        // Wait for the default cluster URL to appear
-        LOGGER.info("Waiting for DEFAULT_CLUSTER_URL to appear...");
-        view.waitForTreeItem(DEFAULT_CLUSTER_URL, 300, 5); // Wait for "loading..." to finish
-        LOGGER.info("DEFAULT_CLUSTER_URL appeared.");
+            // Wait for the default cluster URL to appear
+            LOGGER.info("Waiting for DEFAULT_CLUSTER_URL to appear...");
+            view.waitForTreeItem(DEFAULT_CLUSTER_URL, 300, 5); // Wait for "loading..." to finish
+            LOGGER.info("DEFAULT_CLUSTER_URL appeared.");
 
-        // Refresh the Openshift view tree
-        LOGGER.info("Refreshing Openshift view tree...");
-        view.refreshTree(robot);
-        LOGGER.info("Openshift view tree refreshed.");
+            // Refresh the Openshift view tree
+            LOGGER.info("Refreshing Openshift view tree...");
+            view.refreshTree(robot);
+            LOGGER.info("Openshift view tree refreshed.");
 
-        // Wait until all background tasks finish
-        LOGGER.info("Waiting for all background tasks to finish...");
-        IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
-        ideStatusBar.waitUntilAllBgTasksFinish();
-        LOGGER.info("All background tasks finished.");
+            // Wait until all background tasks finish
+            LOGGER.info("Waiting for all background tasks to finish...");
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+            ideStatusBar.waitUntilAllBgTasksFinish();
+            LOGGER.info("All background tasks finished.");
 
-        // Close Openshift view
-        view.closeView();
-        LOGGER.info("Closed Openshift view.");
+            // Close Openshift view
+            view.closeView();
+            LOGGER.info("Closed Openshift view.");
 
-        LOGGER.info("Logout process completed.");
+            LOGGER.info("Logout process completed.");
+        } catch (Exception e) {
+            LOGGER.error("Exception during logout process", e);
+            captureScreenshot("LogoutFailure");
+            throw e; // Rethrow the exception to ensure the failure is propagated
+        }
+    }
+
+    private static void captureScreenshot(String name) {
+        try {
+            File screenshot = ScreenshotUtils.takeScreenshot(robot, name);
+            if (screenshot != null) {
+                LOGGER.info("Screenshot saved: " + screenshot.getAbsolutePath());
+            } else {
+                LOGGER.error("Failed to take screenshot");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Exception while taking screenshot", e);
+        }
     }
 
 
