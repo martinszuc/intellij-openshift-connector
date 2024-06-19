@@ -54,3 +54,8 @@ jobs:
           report_paths: '${{github.workspace}}/build/test-results/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
           check_name: Integration UI Tests Report
+      - name: Publish screenshots as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshots
+          path: ./build/screenshots
