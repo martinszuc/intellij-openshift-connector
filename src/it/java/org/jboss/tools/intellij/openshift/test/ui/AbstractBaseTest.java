@@ -16,6 +16,7 @@ import com.redhat.devtools.intellij.commonuitest.fixtures.dialogs.FlatWelcomeFra
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.idestatusbar.IdeStatusBar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
 import com.redhat.devtools.intellij.commonuitest.utils.project.CreateCloseUtils;
+import com.redhat.devtools.intellij.commonuitest.utils.screenshot.ScreenshotUtils;
 import org.jboss.tools.intellij.openshift.test.ui.annotations.UITest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.ProjectStructureDialog;
 import org.jboss.tools.intellij.openshift.test.ui.junit.TestRunnerExtension;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.time.Duration;
 
 /**
@@ -97,6 +99,7 @@ public abstract class AbstractBaseTest {
             LOGGER.info("Logout process completed successfully.");
         } catch (Exception e) {
             LOGGER.error("Logout failed: {}", e.getMessage());
+            captureScreenshot("logoutfailed");
             throw e;
         }
     }
@@ -122,6 +125,24 @@ public abstract class AbstractBaseTest {
         } catch (InterruptedException e) {
             LOGGER.error("Sleep interrupted: {}", e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Captures a screenshot and saves it with the given comment.
+     *
+     * @param comment The comment to add to the screenshot's filename.
+     */
+    protected static void captureScreenshot(String comment) {
+        try {
+            File screenshotFile = ScreenshotUtils.takeScreenshot(robot, comment);
+            if (screenshotFile != null) {
+                LOGGER.info("Screenshot saved at: {}", screenshotFile.getAbsolutePath());
+            } else {
+                LOGGER.warn("Screenshot capture failed.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to capture screenshot: {}", e.getMessage(), e);
         }
     }
 }
