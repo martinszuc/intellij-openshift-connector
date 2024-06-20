@@ -88,12 +88,12 @@ public abstract class AbstractBaseTest {
             IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
 
             view.openView();
-            ideStatusBar.waitUntilAllBgTasksFinish();
+            ideStatusBar.waitUntilAllBgTasksFinish(600);
 
-            view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 300, 5); // Wait for "loading..." to finish
+            view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 120, 5); // Wait for "loading..." to finish
 
             view.refreshTree(robot);
-            ideStatusBar.waitUntilAllBgTasksFinish();
+            ideStatusBar.waitUntilAllBgTasksFinish(600);
 
             view.closeView();
             LOGGER.info("Logout process completed successfully.");
