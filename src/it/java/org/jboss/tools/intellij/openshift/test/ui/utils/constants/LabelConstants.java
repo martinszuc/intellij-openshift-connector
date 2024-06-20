@@ -24,5 +24,6 @@ public class LabelConstants {
     public static final String OPENSHIFT = "OpenShift";
     public static final String PLEASE_LOG_IN_TO_CLUSTER = "Please log in to the cluster";
     public static final String REFRESH = "Refresh";
+    public static final String NEW_COMPONENT = "New Component";
 }
 

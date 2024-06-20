@@ -59,7 +59,7 @@ public abstract class AbstractClusterTest extends AbstractBaseTest {
 
 
         LOGGER.info("Waiting for '" + expectedURL + "' to appear.");
-        view.waitForTreeItem(expectedURL, 120, 5);
+        view.waitForTreeItem(DEVFILE_REGISTRIES, 120, 5);
         IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
         ideStatusBar.waitUntilAllBgTasksFinish();
 
