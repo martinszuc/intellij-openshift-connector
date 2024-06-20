@@ -34,6 +34,7 @@ public class OpenshiftExtensionTest extends AbstractBaseTest {
 
     @BeforeAll
     public static void logoutOnceBeforeAllTests() {
+        captureScreenshot("before_logout");
         logOut();
     }
 

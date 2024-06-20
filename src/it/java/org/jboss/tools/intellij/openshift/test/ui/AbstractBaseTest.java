@@ -81,11 +81,13 @@ public abstract class AbstractBaseTest {
         LOGGER.info("Starting logout process...");
         try {
             LOGGER.info("Removing KubeConfig...");
+            captureScreenshot("beforerkube");
             KubeConfigUtility.removeKubeConfig();
 
             LOGGER.info("Sleeping for 2000ms...");
             sleep(2000);
 
+            captureScreenshot("afterkube");
             currentClusterUrl = DEFAULT_CLUSTER_URL;
             LOGGER.info("Current cluster URL reset to default: {}", DEFAULT_CLUSTER_URL);
 
@@ -95,6 +97,10 @@ public abstract class AbstractBaseTest {
 
             LOGGER.info("Finding IdeStatusBar...");
             IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+
+            captureScreenshot("os_opened");
+
+            ideStatusBar.waitUntilAllBgTasksFinish(600);
 
             LOGGER.info("Waiting for all background tasks to finish with a timeout of 900 seconds...");
             ideStatusBar.waitUntilAllBgTasksFinish(900);
@@ -114,7 +120,9 @@ public abstract class AbstractBaseTest {
             LOGGER.info("Logout process completed successfully.");
         } catch (Exception e) {
             LOGGER.error("Logout failed: {}", e.getMessage());
-            captureScreenshot("logoutfailed");
+            captureScreenshot("logout_failed");
+            sleep(10000);
+            robot = IdeaRunner.getInstance().getRemoteRobot();
             throw e;
         }
     }
