@@ -74,7 +74,7 @@ public class OpenshiftExtensionTest extends AbstractBaseTest {
 
         view.waitForTreeItem(DEFAULT_CLUSTER_URL,120,5);
         sleep(3000);
-        view.expandOpenshiftViewTree(DEFAULT_CLUSTER_URL);
+        view.expandOpenshiftExceptDevfile();
         view.waitForTreeItem(LabelConstants.PLEASE_LOG_IN_TO_CLUSTER, 120, 5);
 
         view.closeView();
