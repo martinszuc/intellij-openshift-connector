@@ -19,7 +19,7 @@ public class PublicTestsSuite {
     @BeforeAll
     public static void setUp() {
         KubeConfigUtility.backupKubeConfig();
-        KubeConfigUtility.removeKubeConfig();
+//        KubeConfigUtility.removeKubeConfig();
     }
 
     @AfterAll
