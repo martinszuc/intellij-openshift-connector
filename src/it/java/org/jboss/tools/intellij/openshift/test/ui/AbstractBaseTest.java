@@ -80,22 +80,37 @@ public abstract class AbstractBaseTest {
     protected static void logOut() {
         LOGGER.info("Starting logout process...");
         try {
+            LOGGER.info("Removing KubeConfig...");
             KubeConfigUtility.removeKubeConfig();
-            sleep(2000);
-            currentClusterUrl = DEFAULT_CLUSTER_URL;
 
+            LOGGER.info("Sleeping for 2000ms...");
+            sleep(2000);
+
+            currentClusterUrl = DEFAULT_CLUSTER_URL;
+            LOGGER.info("Current cluster URL reset to default: {}", DEFAULT_CLUSTER_URL);
+
+            LOGGER.info("Finding and opening Openshift view...");
             OpenshiftView view = robot.find(OpenshiftView.class);
             view.openView();
 
+            LOGGER.info("Finding IdeStatusBar...");
             IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+
+            LOGGER.info("Waiting for all background tasks to finish with a timeout of 900 seconds...");
             ideStatusBar.waitUntilAllBgTasksFinish(900);
 
-            view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 120, 5); // Wait for "loading..." to finish
+            LOGGER.info("Waiting for 'DEVFILE_REGISTRIES' tree item to finish loading...");
+            view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 120, 5);
 
+            LOGGER.info("Refreshing Openshift tree...");
             view.refreshTree(robot);
+
+            LOGGER.info("Waiting for all background tasks to finish...");
             ideStatusBar.waitUntilAllBgTasksFinish();
 
+            LOGGER.info("Closing Openshift view...");
             view.closeView();
+
             LOGGER.info("Logout process completed successfully.");
         } catch (Exception e) {
             LOGGER.error("Logout failed: {}", e.getMessage());
