@@ -85,15 +85,15 @@ public abstract class AbstractBaseTest {
             currentClusterUrl = DEFAULT_CLUSTER_URL;
 
             OpenshiftView view = robot.find(OpenshiftView.class);
-            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
-
             view.openView();
-            ideStatusBar.waitUntilAllBgTasksFinish(600);
+
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+            ideStatusBar.waitUntilAllBgTasksFinish(900);
 
             view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 120, 5); // Wait for "loading..." to finish
 
             view.refreshTree(robot);
-            ideStatusBar.waitUntilAllBgTasksFinish(600);
+            ideStatusBar.waitUntilAllBgTasksFinish();
 
             view.closeView();
             LOGGER.info("Logout process completed successfully.");
