@@ -32,7 +32,7 @@ public class AboutClusterTest extends AbstractClusterTest {
         LOGGER.info("aboutLoggedInTest: Start");
 
         AboutPublicTest.selectAboutAndGetClipboardContent();
-        AboutPublicTest.verifyClipboardContent("odo version", "Server:");
+        AboutPublicTest.verifyClipboardContent("odo", "Server:", "Kubernetes:");
 
         // Close the "Run" tool window
         robot.find(ComponentFixture.class, byXpath(HIDE_BUTTON))
