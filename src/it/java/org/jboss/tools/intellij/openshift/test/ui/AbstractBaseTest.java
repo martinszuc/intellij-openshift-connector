@@ -81,41 +81,64 @@ public abstract class AbstractBaseTest {
         LOGGER.info("Starting logout process...");
         try {
             LOGGER.info("Removing KubeConfig...");
+
+            captureScreenshot("beforerkube");
             KubeConfigUtility.removeKubeConfig();
 
             LOGGER.info("Sleeping for 2000ms...");
+
             sleep(2000);
 
+            captureScreenshot("afterkube");
             currentClusterUrl = DEFAULT_CLUSTER_URL;
+
             LOGGER.info("Current cluster URL reset to default: {}", DEFAULT_CLUSTER_URL);
 
             LOGGER.info("Finding and opening Openshift view...");
+
             OpenshiftView view = robot.find(OpenshiftView.class);
             view.openView();
 
             LOGGER.info("Finding IdeStatusBar...");
+
+            captureScreenshot("os_opened");
             IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
 
+            captureScreenshot("ide_status_bar_found");
+
+
+            captureScreenshot("ide_status_waituntil900_start");
             LOGGER.info("Waiting for all background tasks to finish with a timeout of 900 seconds...");
             ideStatusBar.waitUntilAllBgTasksFinish(900);
 
+            captureScreenshot("ide_status_waituntil900_end");
+
             LOGGER.info("Waiting for 'DEVFILE_REGISTRIES' tree item to finish loading...");
+
             view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES, 120, 5);
 
             LOGGER.info("Refreshing Openshift tree...");
+
             view.refreshTree(robot);
 
             LOGGER.info("Waiting for all background tasks to finish...");
+
             ideStatusBar.waitUntilAllBgTasksFinish();
 
             LOGGER.info("Closing Openshift view...");
+
             view.closeView();
 
             LOGGER.info("Logout process completed successfully.");
         } catch (Exception e) {
             LOGGER.error("Logout failed: {}", e.getMessage());
-            captureScreenshot("logoutfailed");
-            throw e;
+            captureScreenshot("logout_failed_start");
+            sleep(10000);
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+            ideStatusBar.waitUntilAllBgTasksFinish();
+            CleanUpUtility.cleanUpAll(robot);
+            captureScreenshot("logout_failed_end");
         }
     }
 
