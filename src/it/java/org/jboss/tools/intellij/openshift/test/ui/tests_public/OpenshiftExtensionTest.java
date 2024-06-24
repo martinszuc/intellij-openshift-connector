@@ -72,9 +72,8 @@ public class OpenshiftExtensionTest extends AbstractBaseTest {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
 
-        view.waitForTreeItem(DEFAULT_CLUSTER_URL,120,5);
-        sleep(3000);
-        view.expandOpenshiftExceptDevfile();
+        view.waitForTreeItem(DEFAULT_CLUSTER_URL, 120, 5);
+        view.getOpenshiftConnectorTree().doubleClickRow(0);
         view.waitForTreeItem(LabelConstants.PLEASE_LOG_IN_TO_CLUSTER, 120, 5);
 
         view.closeView();
