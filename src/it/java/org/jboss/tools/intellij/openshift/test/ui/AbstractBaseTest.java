@@ -26,14 +26,17 @@ import org.jboss.tools.intellij.openshift.test.ui.utils.KubeConfigUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.ProjectUtility;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
+
 
 /**
  * @author Ondrej Dockal, odockal@redhat.com
@@ -47,6 +50,9 @@ public abstract class AbstractBaseTest {
     private static boolean isProjectCreatedAndOpened = false;
     public static final String DEFAULT_CLUSTER_URL = "no (current) context/cluster set";
     protected static String currentClusterUrl = DEFAULT_CLUSTER_URL;
+
+    @RegisterExtension
+    TestWatcher testWatcher = new TestWatcherImpl();
 
     @BeforeAll
     public static void setUpProject() {
@@ -67,11 +73,6 @@ public abstract class AbstractBaseTest {
 
             isProjectCreatedAndOpened = true;
         }
-    }
-
-    @AfterEach
-    public void afterEachCleanUp() {
-        CleanUpUtility.cleanUpAll(robot);
     }
 
     /**
@@ -99,8 +100,19 @@ public abstract class AbstractBaseTest {
             LOGGER.info("Logout process completed successfully.");
         } catch (Exception e) {
             LOGGER.error("Logout failed: {}", e.getMessage());
-            captureScreenshot("logoutfailed");
-            throw e;
+            captureScreenshot("1logout_failed");
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+            captureScreenshot("2failed_before_wait");
+            ideStatusBar.waitUntilAllBgTasksFinish(900);
+
+            captureScreenshot("3failed_before_cleanup");
+            OpenshiftView view = robot.find(OpenshiftView.class);
+            captureScreenshot("4failed_after_cleanup");
+            view.refreshTree(robot);
+            captureScreenshot("5os_refreshed");
+            ideStatusBar.waitUntilAllBgTasksFinish();
+            CleanUpUtility.cleanUpAll(robot);
         }
     }
 
@@ -143,6 +155,13 @@ public abstract class AbstractBaseTest {
             }
         } catch (Exception e) {
             LOGGER.error("Failed to capture screenshot: {}", e.getMessage(), e);
+        }
+    }
+    private static class TestWatcherImpl implements TestWatcher {
+        @Override
+        public void testFailed(ExtensionContext context, Throwable cause) {
+            captureScreenshot("test_failed_" + context.getDisplayName());
+            CleanUpUtility.cleanUpAll(robot);
         }
     }
 }
