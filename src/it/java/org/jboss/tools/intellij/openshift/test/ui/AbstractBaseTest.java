@@ -99,8 +99,14 @@ public abstract class AbstractBaseTest {
             LOGGER.info("Logout process completed successfully.");
         } catch (Exception e) {
             LOGGER.error("Logout failed: {}", e.getMessage());
-            captureScreenshot("logoutfailed");
-            throw e;
+            captureScreenshot("logout_failed");
+            robot = IdeaRunner.getInstance().getRemoteRobot();
+            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class);
+            captureScreenshot("failed_before_wait");
+            ideStatusBar.waitUntilAllBgTasksFinish(900);
+            captureScreenshot("failed_before_cleanup");
+            CleanUpUtility.cleanUpAll(robot);
+            captureScreenshot("failed_after_cleanup");
         }
     }
 
