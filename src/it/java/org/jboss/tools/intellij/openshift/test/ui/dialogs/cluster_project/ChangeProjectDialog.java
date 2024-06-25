@@ -15,7 +15,7 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 /**
  * Change Active Project dialog fixture
  */
-@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.CHANGE_CLUSTER_PROJECT_DIALOG)
+@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.MYDIALOG_CLASS)
 @FixtureName(name = "Change Active Project Dialog")
 public class ChangeProjectDialog extends CommonContainerFixture {
 
