@@ -60,6 +60,12 @@ public class CreateComponentDialog extends CommonContainerFixture {
     }
 
     public void selectComponentType(String type) {
+        // Click to open the dropdown
+        find(ComponentFixture.class, byXpath("//div[@class='JComboBox']")).click();
+
+        // Find the JList and select the item
+        JListFixture jList = find(JListFixture.class, byXpath("//div[@class='JList']"));
+        jList.clickItem(type,false);
     }
 
     public void setStartDevMode(boolean start) {

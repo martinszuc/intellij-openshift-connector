@@ -111,6 +111,7 @@ tasks.register('clusterIntegrationUITest', Test) {
         includeTags 'ui-test'
     }
     systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'disabled'
+    systemProperties['CLUSTER_ALREADY_LOGGED_IN'] = System.getenv('CLUSTER_ALREADY_LOGGED_IN') ?: 'false'
     description = 'Runs the cluster integration UI tests.'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
