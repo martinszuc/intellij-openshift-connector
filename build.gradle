@@ -3,7 +3,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.17.3'
+    id 'org.jetbrains.intellij' version '1.17.4'
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'idea'
     id 'java'
@@ -171,12 +171,12 @@ dependencies {
             'com.redhat.devtools.intellij:intellij-common:1.9.6-SNAPSHOT',
             'io.jsonwebtoken:jjwt-impl:0.12.5',
             'io.jsonwebtoken:jjwt-jackson:0.12.5',
-            'org.keycloak:keycloak-installed-adapter:24.0.3',
+            'org.keycloak:keycloak-installed-adapter:24.0.5',
             'com.squareup.retrofit2:converter-jackson:2.11.0',
-            'com.google.code.gson:gson:2.10.1')
+            'com.google.code.gson:gson:2.11.0')
     testImplementation(
             'org.junit.platform:junit-platform-launcher:1.10.2',
-            'org.mockito:mockito-core:5.11.0',
+            'org.mockito:mockito-core:5.12.0',
             'org.easytesting:fest-assert:1.4',
             'com.redhat.devtools.intellij:intellij-common:1.9.6-SNAPSHOT:test',
             'org.awaitility:awaitility:4.2.1',
@@ -190,6 +190,9 @@ dependencies {
     constraints {
         implementation('io.undertow:undertow-core:2.3.13.Final') { //keycloak
             because 'https://security.snyk.io/vuln/SNYK-JAVA-IOUNDERTOW-6567186'
+        }
+        implementation('org.bouncycastle:bcprov-jdk18on:1.78.1') { //keycloak
+            because 'https://app.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-6612984'
         }
         implementation('com.squareup.okhttp3:okhttp:4.12.0') { //retrofit
             because 'https://security.snyk.io/vuln/SNYK-JAVA-COMSQUAREUPOKHTTP3-2958044'
