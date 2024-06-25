@@ -13,6 +13,7 @@ package org.jboss.tools.intellij.openshift.test.ui.tests_cluster;
 import com.intellij.remoterobot.fixtures.ComponentFixture;
 import org.jboss.tools.intellij.openshift.test.ui.tests_public.AboutPublicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ public class AboutClusterTest extends AbstractClusterTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AboutClusterTest.class);
 
     @Test
+    @EnabledIfSystemProperty(named = "CLUSTER_ALREADY_LOGGED_IN", matches = "false", disabledReason = "Already logged in, skipping login test")
     public void aboutLoggedInTest() {
         LOGGER.info("aboutLoggedInTest: Start");
 

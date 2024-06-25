@@ -38,7 +38,7 @@ jobs:
           done
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Play integration UI tests
+      - name: Play public integration UI tests
         env:
           GPG_PASSPHRASE: ${{ secrets.IDEA_KEY_PASSPHRASE }}
         run: |
@@ -46,7 +46,17 @@ jobs:
           export DISPLAY=:99.0
           Xvfb -ac :99 -screen 0 1920x1080x16 &
           sleep 10
-          ./gradlew publicIntegrationUITest --continue --no-daemon
+          ./gradlew publicIntegrationUITest --continue --no-daemon --info
+      - name: Play cluster integration UI tests
+        env:
+          GPG_PASSPHRASE: ${{ secrets.IDEA_KEY_PASSPHRASE }}
+          CLUSTER_ALREADY_LOGGED_IN: 'true'
+        run: |
+          echo -n "$GPG_PASSPHRASE" | gpg --decrypt --passphrase-fd 0 --pinentry-mode loopback --output idea_license_token/idea.key idea_license_token/idea.key.gpg
+          export DISPLAY=:99.0
+          Xvfb -ac :99 -screen 0 1920x1080x16 &
+          sleep 10
+          ./gradlew clusterIntegrationUITest --continue --no-daemon --info
       - name: Publish tests reports
         uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 #v1.8.0
         with:

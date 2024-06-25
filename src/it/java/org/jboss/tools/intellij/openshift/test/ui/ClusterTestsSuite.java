@@ -23,7 +23,6 @@ public class ClusterTestsSuite {
     @BeforeAll
     public static void setUp() {
         KubeConfigUtility.backupKubeConfig();
-        KubeConfigUtility.removeKubeConfig();
     }
 
     @AfterAll
