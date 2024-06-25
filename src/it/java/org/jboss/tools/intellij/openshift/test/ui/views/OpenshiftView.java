@@ -97,4 +97,19 @@ public class OpenshiftView extends ContainerFixture {
             return false;
         }
     }
+
+    /**
+     * Checks if a menu option exists without clicking it.
+     * @param robot the RemoteRobot instance
+     * @param selection the label of the menu option to check
+     * @return true if the menu option exists, false otherwise
+     */
+    public boolean hasMenuOption(RemoteRobot robot, String selection) {
+        try {
+            getOpenshiftConnectorTree().rightClickRow(0);
+            return findAll(ComponentFixture.class, byXpath(getTextXPath(selection))).size() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
