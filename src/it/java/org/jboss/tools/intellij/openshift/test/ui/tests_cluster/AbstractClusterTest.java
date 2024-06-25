@@ -34,10 +34,21 @@ public abstract class AbstractClusterTest extends AbstractBaseTest {
     private static final String CLUSTER_URL = System.getenv("CLUSTER_URL");
     private static final String CLUSTER_USER = System.getenv("CLUSTER_USER");
     private static final String CLUSTER_PASSWORD = System.getenv("CLUSTER_PASSWORD");
+    private static final boolean CLUSTER_ALREADY_LOGGED_IN = Boolean.parseBoolean(System.getenv("CLUSTER_ALREADY_LOGGED_IN"));
+
 
     @BeforeAll
-    public static void setUp(){
-        CleanUpUtility.cleanUpAll(robot);
+    public static void setUp() {
+        if (CLUSTER_ALREADY_LOGGED_IN) {
+            OpenshiftView view = robot.find(OpenshiftView.class);
+            view.openView();
+            view.refreshTree(robot);
+            currentClusterUrl = view.getOpenshiftConnectorTree().getValueAtRow(0);
+            LOGGER.info("Using already logged in cluster URL: " + currentClusterUrl);
+            view.closeView();
+        } else {
+            CleanUpUtility.cleanUpAll(robot);
+        }
     }
 
     protected void loginWithUsername() {
