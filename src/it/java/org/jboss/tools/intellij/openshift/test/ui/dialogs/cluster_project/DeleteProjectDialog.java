@@ -11,7 +11,7 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 /**
  * Delete Project dialog fixture
  */
-@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.DELETE_CLUSTER_PROJECT_DIALOG)
+@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.MYDIALOG_CLASS)
 @FixtureName(name = "Delete Project Dialog")
 public class DeleteProjectDialog extends CommonContainerFixture {
 

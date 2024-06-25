@@ -25,8 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.fest.assertions.Fail.fail;
 
@@ -42,7 +40,9 @@ public class ProjectClusterTest extends AbstractClusterTest {
         LOGGER.info("createNewProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
-        openshiftView.menuRightClickAndSelect(robot, 0, LabelConstants.NEW_PROJECT);
+
+        String newProjectLabel = findLabel(openshiftView, LabelConstants.NEW_PROJECT, LabelConstants.NEW_NAMESPACE);
+        openshiftView.menuRightClickAndSelect(robot, 0, newProjectLabel);
 
         createNewClusterProject(PROJECT_NAME);
         robot.find(IdeStatusBar.class).waitUntilAllBgTasksFinish();
@@ -57,17 +57,19 @@ public class ProjectClusterTest extends AbstractClusterTest {
         LOGGER.info("changeActiveProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
-        openshiftView.menuRightClickAndSelect(robot, 0, LabelConstants.NEW_PROJECT);
+
+        String newProjectLabel = findLabel(openshiftView, LabelConstants.NEW_PROJECT, LabelConstants.NEW_NAMESPACE);
+        openshiftView.menuRightClickAndSelect(robot, 0, newProjectLabel);
 
         createNewClusterProject(NEW_PROJECT_NAME);
         verifyProjectIsVisible(NEW_PROJECT_NAME);
 
-        openshiftView.menuRightClickAndSelect(robot, 0, LabelConstants.CHANGE_PROJECT);
+        String changeProjectLabel = findLabel(openshiftView, LabelConstants.CHANGE_PROJECT, LabelConstants.CHANGE_NAMESPACE);
+        openshiftView.menuRightClickAndSelect(robot, 0, changeProjectLabel);
 
         ChangeProjectDialog changeProjectDialog = robot.find(ChangeProjectDialog.class, Duration.ofSeconds(20));
         changeProjectDialog.enterProjectName(robot, PROJECT_NAME);
         changeProjectDialog.clickChange();
-
 
         robot.find(IdeStatusBar.class).waitUntilAllBgTasksFinish();
         verifyProjectIsVisible(PROJECT_NAME);
@@ -80,14 +82,16 @@ public class ProjectClusterTest extends AbstractClusterTest {
         LOGGER.info("deleteProjectTest: Start");
         OpenshiftView openshiftView = robot.find(OpenshiftView.class);
         openshiftView.openView();
-        openshiftView.menuRightClickAndSelect(robot, 1, LabelConstants.DELETE_PROJECT);
+
+        String deleteProjectLabel = findLabel(openshiftView, LabelConstants.DELETE_PROJECT, LabelConstants.DELETE_NAMESPACE);
+        openshiftView.menuRightClickAndSelect(robot, 1, deleteProjectLabel);
 
         DeleteProjectDialog deleteProjectDialog = robot.find(DeleteProjectDialog.class, Duration.ofSeconds(20));
         deleteProjectDialog.clickYes();
 
         robot.find(IdeStatusBar.class).waitUntilAllBgTasksFinish();
 
-        verifyProjectHasItem(PROJECT_NAME, "Missing project,");
+        verifyProjectHasItem(PROJECT_NAME, "Missing");
         LOGGER.info("deleteProjectTest: End");
     }
 
@@ -127,4 +131,22 @@ public class ProjectClusterTest extends AbstractClusterTest {
         }
     }
 
+    /**
+     * Helper method to find the appropriate label for the given primary and fallback labels.
+     * @param openshiftView the Openshift view
+     * @param primaryLabel the primary label to try
+     * @param fallbackLabel the fallback label to use if the primary is not found
+     * @return the appropriate label for the action
+     */
+    private String findLabel(OpenshiftView openshiftView, String primaryLabel, String fallbackLabel) {
+        // Try to locate the primary label
+        try {
+            if (openshiftView.hasMenuOption(robot, primaryLabel)) {
+                return primaryLabel;
+            }
+        } catch (Exception e) {
+            // Ignore exceptions and fall back to the secondary label
+        }
+        return fallbackLabel;
+    }
 }
