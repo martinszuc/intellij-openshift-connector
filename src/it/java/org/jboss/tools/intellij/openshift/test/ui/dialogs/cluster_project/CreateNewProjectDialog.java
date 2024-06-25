@@ -11,7 +11,7 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 /**
  * Create New Project dialog fixture
  */
-@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.CREATE_CLUSTER_PROJECT_DIALOG)
+@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.MYDIALOG_CLASS)
 @FixtureName(name = "Create New Project Dialog")
 public class CreateNewProjectDialog extends CommonContainerFixture {
 
