@@ -1,9 +1,6 @@
 package org.jboss.tools.intellij.openshift.test.ui;
 
-import org.jboss.tools.intellij.openshift.test.ui.tests_cluster.AboutClusterTest;
-import org.jboss.tools.intellij.openshift.test.ui.tests_cluster.LoginClusterTest;
-import org.jboss.tools.intellij.openshift.test.ui.tests_cluster.ProjectClusterTest;
-import org.jboss.tools.intellij.openshift.test.ui.tests_cluster.CreateComponentTest;
+import org.jboss.tools.intellij.openshift.test.ui.tests_cluster.*;
 import org.jboss.tools.intellij.openshift.test.ui.utils.KubeConfigUtility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,7 +13,8 @@ import org.junit.platform.suite.api.Suite;
         LoginClusterTest.class,
         AboutClusterTest.class,
         ProjectClusterTest.class,
-        CreateComponentTest.class
+        CreateComponentTest.class,
+        CreateServiceTest.class
 })
 @IncludeClassNamePatterns({"^.*Test$"})
 public class ClusterTestsSuite {
