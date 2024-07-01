@@ -28,5 +28,6 @@ public class LabelConstants {
     public static final String PLEASE_LOG_IN_TO_CLUSTER = "Please log in to the cluster";
     public static final String REFRESH = "Refresh";
     public static final String NEW_COMPONENT = "New Component";
+    public static final String NEW_SERVICE = "New Service";
 }
 
