@@ -1,7 +1,6 @@
 package org.jboss.tools.intellij.openshift.test.ui.tests_cluster;
 
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
-import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.component.CreateComponentDialog;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CreateComponentTest extends AbstractBaseTest {
+public class CreateComponentTest extends AbstractClusterTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateComponentTest.class);
 
@@ -31,5 +30,20 @@ public class CreateComponentTest extends AbstractBaseTest {
         assertThrowsExactly(WaitForConditionTimeoutException.class, () -> {
             robot.find(CreateComponentDialog.class, Duration.ofSeconds(2));
         });
+    }
+
+    @Test
+    @Order(2)
+    public void createGoRuntimeComponentTest() {
+        String COMPONENT_NAME = "test-component";
+
+        CreateComponentDialog createComponentDialog = CreateComponentDialog.open(robot);
+        assertNotNull(createComponentDialog);
+        createComponentDialog.setName(COMPONENT_NAME);
+        createComponentDialog.selectComponentType("Go Runtime", robot);
+        createComponentDialog.setStartDevMode(true);
+        createComponentDialog.clickCreate();
+
+        ProjectClusterTest.verifyProjectHasItem("newtestproject", COMPONENT_NAME);
     }
 }

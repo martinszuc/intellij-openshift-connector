@@ -45,6 +45,7 @@ public class XPathConstants {
     public static final String TEXT_FIELD_W_AUTO_COMPLETION = "//div[@class='TextFieldWithAutoCompletion']";
     public static final String TREE_CLASS = "//div[@class='Tree']";
     public static final String BUTTON_HELP = "//div[@accessiblename='Help' and @class='JButton' and @text='Help']";
+    public static final String JLIST = "//div[@class='JList']";
 
     public static String getToolWindowButton(String label) {
         return "//div[@tooltiptext='" + label + "']";

@@ -13,11 +13,14 @@ package org.jboss.tools.intellij.openshift.test.ui.dialogs.component;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
+import com.intellij.remoterobot.utils.Keyboard;
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.event.KeyEvent;
 import java.time.Duration;
 
 import static com.intellij.remoterobot.search.locators.Locators.byXpath;
@@ -25,7 +28,7 @@ import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 /**
  * Create Component dialog fixture
  */
-@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.CREATE_COMPONENT_DIALOG)
+@DefaultXpath(by = "MyDialog type", xpath = XPathConstants.MYDIALOG_CLASS)
 @FixtureName(name = "Create Component Dialog")
 public class CreateComponentDialog extends CommonContainerFixture {
 
@@ -34,10 +37,10 @@ public class CreateComponentDialog extends CommonContainerFixture {
     }
 
     public static CreateComponentDialog open(RemoteRobot robot) {
-         OpenshiftView view = robot.find(OpenshiftView.class);
-         view.openView();
-         view.expandOpenshiftExceptDevfile();
-         view.menuRightClickAndSelect(robot, 1, LabelConstants.NEW_COMPONENT);
+        OpenshiftView view = robot.find(OpenshiftView.class);
+        view.openView();
+        view.expandOpenshiftExceptDevfile();
+        view.menuRightClickAndSelect(robot, 1, LabelConstants.NEW_COMPONENT);
         return robot.find(CreateComponentDialog.class, Duration.ofSeconds(60));
     }
 
@@ -46,7 +49,7 @@ public class CreateComponentDialog extends CommonContainerFixture {
     }
 
     public void setName(String name) {
-        JTextFieldFixture nameField = find(JTextFieldFixture.class, byXpath("//div[@class='JTextField' and @visible_text='untitled1']"));
+        JTextFieldFixture nameField = findAll(JTextFieldFixture.class, byXpath(XPathConstants.JTEXT_FIELD)).get(0);
         nameField.click();
         nameField.setText(name);
     }
@@ -59,13 +62,32 @@ public class CreateComponentDialog extends CommonContainerFixture {
         find(ComponentFixture.class, byXpath("//div[@text='Select folder']")).click();
     }
 
-    public void selectComponentType(String type) {
-        // Click to open the dropdown
-        find(ComponentFixture.class, byXpath("//div[@class='JComboBox']")).click();
+    public void selectComponentType(String type, RemoteRobot remoteRobot) {
+        // Find the JList
+        JListFixture jList = find(JListFixture.class, byXpath(XPathConstants.JLIST));
+        jList.click();
 
-        // Find the JList and select the item
-        JListFixture jList = find(JListFixture.class, byXpath("//div[@class='JList']"));
-        jList.clickItem(type,false);
+        // Use RemoteRobot's Keyboard to go to the top
+        Keyboard keyboard = new Keyboard(remoteRobot);
+        keyboard.key(KeyEvent.VK_HOME);
+
+        boolean itemFound = false;
+        int attempts = 0;
+
+        while (!itemFound && attempts < 30) { // Limit attempts to prevent infinite loop
+            try {
+                jList.clickItem(type, false);
+                itemFound = true;
+            } catch (WaitForConditionTimeoutException e) {
+                // Scroll down by pressing the Down key
+                keyboard.key(KeyEvent.VK_DOWN);
+            }
+            attempts++;
+        }
+
+        if (!itemFound) {
+            throw new RuntimeException("Component type not found: " + type);
+        }
     }
 
     public void setStartDevMode(boolean start) {

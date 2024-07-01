@@ -17,10 +17,7 @@ import org.jboss.tools.intellij.openshift.test.ui.dialogs.cluster_project.Create
 import org.jboss.tools.intellij.openshift.test.ui.dialogs.cluster_project.DeleteProjectDialog;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,15 +61,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
         createNewClusterProject(NEW_PROJECT_NAME);
         verifyProjectIsVisible(NEW_PROJECT_NAME);
 
-        String changeProjectLabel = findLabel(openshiftView, LabelConstants.CHANGE_PROJECT, LabelConstants.CHANGE_NAMESPACE,0);
-        openshiftView.menuRightClickAndSelect(robot, 0, changeProjectLabel);
-
-        ChangeProjectDialog changeProjectDialog = robot.find(ChangeProjectDialog.class, Duration.ofSeconds(20));
-        changeProjectDialog.enterProjectName(robot, PROJECT_NAME);
-        changeProjectDialog.clickChange();
-
-        robot.find(IdeStatusBar.class).waitUntilAllBgTasksFinish();
-        verifyProjectIsVisible(PROJECT_NAME);
+        changeActiveProject(PROJECT_NAME);
         LOGGER.info("changeActiveProjectTest: End");
     }
 
@@ -95,6 +84,13 @@ public class ProjectClusterTest extends AbstractClusterTest {
         LOGGER.info("deleteProjectTest: End");
     }
 
+    @AfterAll
+    public static void afterAll() {
+        LOGGER.info("afterAll: Start");
+        changeActiveProject(NEW_PROJECT_NAME);
+        LOGGER.info("afterAll: End");
+    }
+
     private static void createNewClusterProject(String projectName) {
         CreateNewProjectDialog createNewProjectDialog = robot.find(CreateNewProjectDialog.class, Duration.ofSeconds(20));
         createNewProjectDialog.enterProjectName(projectName);
@@ -115,7 +111,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
         LOGGER.info("Project " + projectName + " is created and visible in the OpenShift view.");
     }
 
-    private void verifyProjectHasItem(String projectName, String itemName) {
+    public static void verifyProjectHasItem(String projectName, String itemName) {
         LOGGER.info("Verifying project " + projectName + " has item: " + itemName);
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.refreshTree(robot);
@@ -150,7 +146,7 @@ public class ProjectClusterTest extends AbstractClusterTest {
      * @param row the row index to right-click
      * @return the appropriate label for the action
      */
-    private String findLabel(OpenshiftView openshiftView, String primaryLabel, String fallbackLabel, int row) {
+    private static String findLabel(OpenshiftView openshiftView, String primaryLabel, String fallbackLabel, int row) {
         // Try to locate the primary label
         try {
             if (openshiftView.hasMenuOption(robot, primaryLabel, row)) {
@@ -160,5 +156,24 @@ public class ProjectClusterTest extends AbstractClusterTest {
             // Ignore exceptions and fall back to the secondary label
         }
         return fallbackLabel;
+    }
+
+    /**
+     * Changes the active project to the specified project name.
+     *
+     * @param projectName the name of the project to switch to
+     */
+    private static void changeActiveProject(String projectName) {
+        OpenshiftView openshiftView = robot.find(OpenshiftView.class);
+        openshiftView.openView();
+
+        String changeProjectLabel = findLabel(openshiftView, LabelConstants.CHANGE_PROJECT, LabelConstants.CHANGE_NAMESPACE, 0);
+        openshiftView.menuRightClickAndSelect(robot, 0, changeProjectLabel);
+
+        ChangeProjectDialog changeProjectDialog = robot.find(ChangeProjectDialog.class, Duration.ofSeconds(20));
+        changeProjectDialog.enterProjectName(robot, projectName);
+        changeProjectDialog.clickChange();
+
+        robot.find(IdeStatusBar.class).waitUntilAllBgTasksFinish();
     }
 }
