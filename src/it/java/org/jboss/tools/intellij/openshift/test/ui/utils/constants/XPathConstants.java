@@ -19,14 +19,11 @@ public class XPathConstants {
     public static final String BUTTON_CREATE = "//div[@text='Create']";
     public static final String BUTTON_NEXT = "//div[@text='Next']";
     public static final String BUTTON_NO = "//div[@text='No']";
+    public static final String BUTTON_OK = "//div[@text='OK']";
     public static final String BUTTON_PREVIOUS = "//div[@text='Previous']";
     public static final String BUTTON_YES = "//div[@text='Yes']";
-    public static final String CHANGE_CLUSTER_PROJECT_DIALOG = "//div[@class='MyDialog' and @title='Change Active Project']";
     public static final String CLUSTER_LOGIN_DIALOG = "//div[@accessiblename='Cluster Login' and @class='MyDialog']";
     public static final String COPY = "//div[contains(@text.key, 'action.$Copy.text')]";
-    public static final String CREATE_CLUSTER_PROJECT_DIALOG = "//div[@class='MyDialog' and @title='Create New Project']";
-    public static final String CREATE_COMPONENT_DIALOG = "//div[@accessiblename='Create component' and @class='MyDialog']";
-    public static final String DELETE_CLUSTER_PROJECT_DIALOG = "//div[@class='MyDialog' and @title='Delete Project']";
     public static final String GETTING_STARTED_BASELABEL = "//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']";
     public static final String HIDE_BUTTON = "//div[@class='ToolWindowHeader'][.//div[@class='ContentTabLabel']]//div[@myaction.key='tool.window.hide.action.name']";
     public static final String IDE_FRAME_IMPL = "//div[@class='IdeFrameImpl']";
