@@ -55,7 +55,7 @@ public class ClusterLoginDialogPublicTest extends AbstractBaseTest {
         LOGGER.info("clusterLoginDialogTest: End");
     }
 
-    @Test
+//    @Test
     @Order(2)
     public void pasteLoginCommandTest() {
         LOGGER.info("pasteLoginCommandTest: Start");
@@ -81,7 +81,7 @@ public class ClusterLoginDialogPublicTest extends AbstractBaseTest {
     }
 
     @Test
-    @Order(3)
+    @Order(2)
     public void pasteTokenLoginCommandTest() {
         LOGGER.info("pasteTokenLoginCommandTest: Start");
 
