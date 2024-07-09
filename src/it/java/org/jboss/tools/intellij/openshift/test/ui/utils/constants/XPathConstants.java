@@ -43,10 +43,13 @@ public class XPathConstants {
     public static final String TREE_CLASS = "//div[@class='Tree']";
     public static final String BUTTON_HELP = "//div[@accessiblename='Help' and @class='JButton' and @text='Help']";
     public static final String JLIST = "//div[@class='JList']";
+    public static final String BUTTON_PASTE_LOGIN_COMMAND = "//div[@text='Paste Login Command']";
+
 
     public static String getToolWindowButton(String label) {
         return "//div[@tooltiptext='" + label + "']";
     }
+
     public static String getTextXPath(String selection) {
         return "//div[@text='" + selection + "']";
     }

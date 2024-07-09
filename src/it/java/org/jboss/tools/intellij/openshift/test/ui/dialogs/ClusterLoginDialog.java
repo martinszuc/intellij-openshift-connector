@@ -12,11 +12,9 @@ package org.jboss.tools.intellij.openshift.test.ui.dialogs;
 
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
-import com.intellij.remoterobot.fixtures.CommonContainerFixture;
-import com.intellij.remoterobot.fixtures.DefaultXpath;
-import com.intellij.remoterobot.fixtures.FixtureName;
-import com.intellij.remoterobot.fixtures.JTextFieldFixture;
+import com.intellij.remoterobot.fixtures.*;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
+import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +31,7 @@ import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathCo
  *
  * @author mszuc@redhat.com
  */
-@DefaultXpath(by = "MyDialog type", xpath = CLUSTER_LOGIN_DIALOG)
+@DefaultXpath(by = "MyDialog type", xpath = MYDIALOG_CLASS)
 @FixtureName(name = "Cluster Login Dialog")
 public class ClusterLoginDialog extends CommonContainerFixture {
 
@@ -78,5 +76,32 @@ public class ClusterLoginDialog extends CommonContainerFixture {
         passwordField.click();
         passwordField.setText(password);
     }
+
+    public String getURL() {
+        JTextFieldFixture urlField = findAll(JTextFieldFixture.class, byXpath(JTEXT_FIELD)).get(0);
+        return urlField.getText();
+    }
+
+    public String getToken() {
+        List<JTextFieldFixture> passwordFields = findAll(JTextFieldFixture.class, byXpath(JPASSWORD_FIELD));
+        JTextFieldFixture tokenField = passwordFields.get(0);
+        return tokenField.getText();
+    }
+
+    public String getUsername() {
+        JTextFieldFixture usernameField = findAll(JTextFieldFixture.class, byXpath(JTEXT_FIELD)).get(1);
+        return usernameField.getText();
+    }
+
+    public String getPassword() {
+        List<JTextFieldFixture> passwordFields = findAll(JTextFieldFixture.class, byXpath(JPASSWORD_FIELD));
+        JTextFieldFixture passwordField = passwordFields.get(1);
+        return passwordField.getText();
+    }
+
+    public void clickPasteLoginCommand() {
+        find(ComponentFixture.class, byXpath(BUTTON_PASTE_LOGIN_COMMAND)).click();
+    }
+
 
 }
