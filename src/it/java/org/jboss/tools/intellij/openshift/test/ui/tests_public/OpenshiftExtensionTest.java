@@ -10,8 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.intellij.openshift.test.ui.tests_public;
 
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.redhat.devtools.intellij.commonuitest.utils.constants.XPathDefinitions;
 import org.jboss.tools.intellij.openshift.test.ui.AbstractBaseTest;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants;
+import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
+import org.jboss.tools.intellij.openshift.test.ui.views.GettingStartedView;
 import org.jboss.tools.intellij.openshift.test.ui.views.OpenshiftView;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -19,9 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 import static org.jboss.tools.intellij.openshift.test.ui.utils.constants.LabelConstants.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Ihor Okhrimenko, Ondrej Dockal
@@ -80,5 +86,20 @@ public class OpenshiftExtensionTest extends AbstractBaseTest {
         LOGGER.info("D" +
                 "defaultNodeTest: End");
 
+    }
+    @Test
+    @Order(4)
+    public void openGettingStartedFromOpenshiftView() {
+        OpenshiftView openshiftView = robot.find(OpenshiftView.class);
+        openshiftView.openView();
+
+        openshiftView.getOpenshiftConnectorTree().rightClickRow(0);
+        robot.find(ComponentFixture.class, byXpath(XPathConstants.GETTING_STARTED_ACTION_MENU_ITEM), Duration.ofSeconds(2)).click();
+
+        GettingStartedView gettingStartedView = robot.find(GettingStartedView.class);
+        assertTrue(gettingStartedView.isShowing(), "Getting Started view is not showing");
+
+        gettingStartedView.closeView();
+        openshiftView.closeView();
     }
 }

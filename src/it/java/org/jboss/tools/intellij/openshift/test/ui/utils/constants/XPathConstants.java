@@ -22,7 +22,6 @@ public class XPathConstants {
     public static final String BUTTON_OK = "//div[@text='OK']";
     public static final String BUTTON_PREVIOUS = "//div[@text='Previous']";
     public static final String BUTTON_YES = "//div[@text='Yes']";
-    public static final String CLUSTER_LOGIN_DIALOG = "//div[@accessiblename='Cluster Login' and @class='MyDialog']";
     public static final String COPY = "//div[contains(@text.key, 'action.$Copy.text')]";
     public static final String GETTING_STARTED_BASELABEL = "//div[@accessiblename='Getting Started' and @class='BaseLabel' and @text='Getting Started']";
     public static final String HIDE_BUTTON = "//div[@class='ToolWindowHeader'][.//div[@class='ContentTabLabel']]//div[@myaction.key='tool.window.hide.action.name']";
@@ -44,6 +43,7 @@ public class XPathConstants {
     public static final String BUTTON_HELP = "//div[@accessiblename='Help' and @class='JButton' and @text='Help']";
     public static final String JLIST = "//div[@class='JList']";
     public static final String BUTTON_PASTE_LOGIN_COMMAND = "//div[@text='Paste Login Command']";
+    public static final String GETTING_STARTED_ACTION_MENU_ITEM = "//div[@accessiblename='Getting Started' and @class='ActionMenuItem' and @text='Getting Started']";
 
 
     public static String getToolWindowButton(String label) {
