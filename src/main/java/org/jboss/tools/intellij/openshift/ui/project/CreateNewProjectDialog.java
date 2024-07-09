@@ -86,7 +86,7 @@ public class CreateNewProjectDialog extends BaseDialog {
     private class ActiveProjectValidator implements Supplier<ValidationInfo> {
 
         private final Pattern nameRegex = Pattern.compile(
-          "^[a-z0-9]+(([.-])?[a-z0-9])$");
+                "^[a-z0-9]+(?:-[a-z0-9]+)*$");
 
         @Override
         public ValidationInfo get() {
