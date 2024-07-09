@@ -17,7 +17,7 @@ import com.redhat.devtools.intellij.common.utils.UIHelper;
 import org.jboss.tools.intellij.openshift.actions.OdoAction;
 import org.jboss.tools.intellij.openshift.tree.application.ApplicationsRootNode;
 import org.jboss.tools.intellij.openshift.ui.cluster.LoginDialog;
-import org.jboss.tools.intellij.openshift.utils.odo.Odo;
+import org.jboss.tools.intellij.openshift.utils.odo.OdoFacade;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -29,15 +29,15 @@ import static org.jboss.tools.intellij.openshift.telemetry.TelemetryService.Tele
 
 public class LoginAction extends OdoAction {
 
-    public LoginAction() {
-        super(ApplicationsRootNode.class);
-    }
-
-    @Override
-    public String getTelemetryActionName() { return "login to cluster"; }
+  public LoginAction() {
+    super(ApplicationsRootNode.class);
+  }
 
   @Override
-  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull Odo odo) {
+  public String getTelemetryActionName() {return "login to cluster";}
+
+  @Override
+  public void actionPerformedOnSelectedObject(AnActionEvent anActionEvent, Object selected, @NotNull OdoFacade odo) {
     ApplicationsRootNode clusterNode = (ApplicationsRootNode) selected;
     runWithProgress((ProgressIndicator progress) -> {
         try {
@@ -45,7 +45,7 @@ public class LoginAction extends OdoAction {
             LoginDialog dialog = new LoginDialog(anActionEvent.getProject(), null, odo.getMasterUrl().toString());
             dialog.show();
             return dialog;
-            });
+          });
           if (loginDialog.isOK()) {
             setProcessing("Logging in...", clusterNode);
             odo.login(
@@ -53,15 +53,15 @@ public class LoginAction extends OdoAction {
               loginDialog.getUserName(),
               loginDialog.getPassword(),
               loginDialog.getToken());
-            clearProcessing(clusterNode);
             sendTelemetryResults(TelemetryResult.SUCCESS);
           } else {
             sendTelemetryResults(TelemetryResult.ABORTED);
           }
         } catch (IOException e) {
-          clearProcessing(clusterNode);
           sendTelemetryError(e);
           UIHelper.executeInUI(() -> Messages.showErrorDialog("Error: " + e.getLocalizedMessage(), "Login"));
+        } finally {
+          clearProcessing(clusterNode);
         }
       },
       "Logging in...",
