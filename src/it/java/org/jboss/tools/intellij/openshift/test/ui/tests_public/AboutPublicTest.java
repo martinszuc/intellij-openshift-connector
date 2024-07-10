@@ -53,6 +53,8 @@ public class AboutPublicTest extends AbstractBaseTest {
     public static void selectAboutAndGetClipboardContent() {
         OpenshiftView view = robot.find(OpenshiftView.class);
         view.openView();
+        view.waitForTreeItem(LabelConstants.DEVFILE_REGISTRIES,120,10);
+
 
         view.menuRightClickAndSelect(robot, 0, LabelConstants.ABOUT);
         waitForComponentByXpath(robot, 120, 10, byXpath(JB_TERMINAL_PANEL));
