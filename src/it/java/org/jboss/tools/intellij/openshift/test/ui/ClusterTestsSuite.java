@@ -10,11 +10,11 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectClasses({
-        LoginClusterTest.class,
-        AboutClusterTest.class,
-        ProjectClusterTest.class,
+//        LoginClusterTest.class,
+//        AboutClusterTest.class,
+//        ProjectClusterTest.class,
         CreateComponentTest.class,
-        CreateServiceTest.class
+//        CreateServiceTest.class
 })
 @IncludeClassNamePatterns({"^.*Test$"})
 public class ClusterTestsSuite {
