@@ -29,5 +29,7 @@ public class LabelConstants {
     public static final String REFRESH = "Refresh";
     public static final String NEW_COMPONENT = "New Component";
     public static final String NEW_SERVICE = "New Service";
+    public static final String START_DEV_CLUSTER = "Start dev on Cluster";
+    public static final String STOP_DEV_CLUSTER = "Stop dev on Cluster";
 }
 

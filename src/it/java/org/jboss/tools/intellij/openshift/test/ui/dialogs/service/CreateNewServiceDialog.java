@@ -42,21 +42,21 @@ public class CreateNewServiceDialog extends CommonContainerFixture {
     }
 
     public void selectTemplateByText(String visibleText) {
-        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']")).get(0);
+        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX)).get(0);
         typeComboBox.click();
         JListFixture jListFixture = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jListFixture.clickItem(visibleText, false);
     }
 
     public void selectType(int index) {
-        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']")).get(1);
+        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX)).get(1);
         typeComboBox.click();
         JListFixture jListFixture = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jListFixture.clickItemAtIndex(index);
     }
 
     public void selectTypeByText(String visibleText) {
-        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']")).get(1);
+        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX)).get(1);
         typeComboBox.click();
         JListFixture jListFixture = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jListFixture.clickItem(visibleText, false);

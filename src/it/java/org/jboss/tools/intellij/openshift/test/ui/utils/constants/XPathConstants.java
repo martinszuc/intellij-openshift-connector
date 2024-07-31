@@ -44,6 +44,7 @@ public class XPathConstants {
     public static final String JLIST = "//div[@class='JList']";
     public static final String BUTTON_PASTE_LOGIN_COMMAND = "//div[@text='Paste Login Command']";
     public static final String GETTING_STARTED_ACTION_MENU_ITEM = "//div[@accessiblename='Getting Started' and @class='ActionMenuItem' and @text='Getting Started']";
+    public static final String JCOMBOBOX = "//div[@class='JComboBox']";
 
 
     public static String getToolWindowButton(String label) {
