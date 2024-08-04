@@ -46,6 +46,9 @@ public class ClusterLoginDialogPublicTest extends AbstractBaseTest {
                 .stream()
                 .anyMatch(ComponentFixture::isShowing));
 
+        captureScreenshot("login_dialog_opened_1");
+
+
         LOGGER.info("Closing cluster login dialog");
         clusterLoginDialog.close();
 
@@ -66,6 +69,7 @@ public class ClusterLoginDialogPublicTest extends AbstractBaseTest {
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
 
         ClusterLoginDialog clusterLoginDialog = ClusterLoginDialog.open(robot);
+        captureScreenshot("login_dialog_opened");
         clusterLoginDialog.clickPasteLoginCommand();
 
         // Verify the text fields are correctly filled
