@@ -40,7 +40,6 @@ jobs:
           commit: ${{github.event.workflow_run.head_sha}}
           check_name: Public Integration UI Tests Report
       - name: Publish screenshots as artifacts
-        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
