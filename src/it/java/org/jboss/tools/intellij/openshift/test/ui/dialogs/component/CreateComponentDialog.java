@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Red Hat, Inc.
+ * Copyright (c) 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -54,22 +54,21 @@ public class CreateComponentDialog extends CommonContainerFixture {
         nameField.setText(name);
     }
 
-    public void selectModule() {
-        find(ComponentFixture.class, byXpath("//div[@text='Select module']")).click();
-    }
-
-    public void selectFolder() {
-        find(ComponentFixture.class, byXpath("//div[@text='Select folder']")).click();
-    }
-
+    /**
+     * Selects a component type from the list within the Create Component dialog.
+     *
+     * Attempts to select the specified component type.
+     * If the component type is not immediately visible, it scrolls down the list
+     * by sending the Down arrow key.
+     *
+     * @param type the name of the component type to select
+     * @param remoteRobot an instance of the RemoteRobot
+     */
     public void selectComponentType(String type, RemoteRobot remoteRobot) {
-        // Find the JList
         JListFixture jList = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jList.click();
-
-        // Use RemoteRobot's Keyboard to go to the top
         Keyboard keyboard = new Keyboard(remoteRobot);
-        keyboard.key(KeyEvent.VK_HOME);
+        keyboard.key(KeyEvent.VK_HOME);         // Use RemoteRobot's Keyboard to go to the top
 
         boolean itemFound = false;
         int attempts = 0;
