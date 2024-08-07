@@ -89,6 +89,16 @@ public class CreateComponentDialog extends CommonContainerFixture {
         }
     }
 
+    /**
+     * Selects a project starter from the combo box.
+     * @param starterName the name of the project starter to select
+     */
+    public void selectProjectStarter(String starterName) {
+        ComboBoxFixture comboBox = find(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX));
+        comboBox.click();
+        comboBox.selectItem(starterName);
+    }
+
     public void setStartDevMode(boolean start) {
         JCheckboxFixture checkBox = find(JCheckboxFixture.class, byXpath(XPathConstants.JCHECKBOX));
         if (start) {
