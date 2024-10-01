@@ -220,6 +220,7 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
         findProperty("tools.dl.path")?.let { systemProperty("tools.dl.path", it) }
         findProperty("testProjectLocation")?.let { systemProperty("testProjectLocation", it) }
         systemProperties["CLUSTER_ALREADY_LOGGED_IN"] = System.getenv("CLUSTER_ALREADY_LOGGED_IN") ?: false
+        systemProperties["RUN_CLUSTER_TESTS"] = System.getenv("RUN_CLUSTER_TESTS") ?: false
         description = "Runs the cluster integration UI tests."
         group = "verification"
         testClassesDirs = sourceSets["it"].output.classesDirs
@@ -232,7 +233,7 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
             showFullStackTraces = true
         }
         jvmArgs("-Djava.awt.headless=false") // use of clipboard in AboutPublicTest, set to false
-        val includes = if (System.getenv("CLUSTER_ALREADY_LOGGED_IN") != null) "**/PublicTestsSuite.class" else "**/ClusterTestsSuite.class"
+        val includes = if (System.getenv("RUN_CLUSTER_TESTS").toBoolean()) {"**/ClusterTestsSuite.class"} else {"**/PublicTestsSuite.class"}
         include(includes)
         useJUnitPlatform {
             includeTags("ui-test")
@@ -259,6 +260,7 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
 // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html#runIdeForUiTests
 val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
     task {
+        jvmArgs("-Djava.awt.headless=false")
         jvmArgumentProviders += CommandLineArgumentProvider {
             listOf(
                 "-Dide.mac.message.dialogs.as.sheets=false",
