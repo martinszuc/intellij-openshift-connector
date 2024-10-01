@@ -30,7 +30,7 @@ public class AboutClusterTest extends AbstractClusterTest {
     @Test
     public void aboutLoggedInTest() {
         LOGGER.info("aboutLoggedInTest: Start");
-
+        captureScreenshot("screen2");
         AboutPublicTest.selectAboutAndGetClipboardContent();
         AboutPublicTest.verifyClipboardContent("odo", "Server:", "Kubernetes:");
 

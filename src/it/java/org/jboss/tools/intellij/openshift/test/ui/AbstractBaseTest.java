@@ -64,13 +64,15 @@ public abstract class AbstractBaseTest {
             flatWelcomeFrame.disableNotifications();
             flatWelcomeFrame.preventTipDialogFromOpening();
 
+            captureScreenshot("before_project");
+
             CreateCloseUtils.createNewProject(robot, "test-project", CreateCloseUtils.NewProjectType.PLAIN_JAVA);
             ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
             ProjectUtility.closeGotItPopup(robot);
 
             IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
             ideStatusBar.waitUntilAllBgTasksFinish();
-
+            captureScreenshot("after_project_created");
             isProjectCreatedAndOpened = true;
         }
     }
