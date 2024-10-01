@@ -259,6 +259,7 @@ val integrationUITest by intellijPlatformTesting.testIde.registering {
 // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html#runIdeForUiTests
 val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
     task {
+        jvmArgs("-Djava.awt.headless=false")
         jvmArgumentProviders += CommandLineArgumentProvider {
             listOf(
                 "-Dide.mac.message.dialogs.as.sheets=false",
