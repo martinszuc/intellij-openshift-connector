@@ -265,6 +265,13 @@ val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
                 "-Dide.mac.message.dialogs.as.sheets=false",
                 "-Djb.privacy.policy.text=<!--999.999-->",
                 "-Djb.consents.confirmation.enabled=false",
+                "-Djb.consents.confirmation.enabled", "false",
+                "-Djb.consents.confirmation.enabled", "false",
+                "-Dide.mac.file.chooser.native", "false",
+                "-DjbScreenMenuBar.enabled", "false",
+                "-Dapple.laf.useScreenMenuBar", "false",
+                "-Didea.trust.all.projects", "true",
+                "-Dide.show.tips.on.startup.default.value", "false"
             )
         }
     }
