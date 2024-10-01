@@ -14,7 +14,10 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.Keyboard;
+import com.redhat.devtools.intellij.commonuitest.UITestRunner;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowLeftToolbar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowRightToolbar;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -43,6 +46,10 @@ public class GettingStartedView extends ContainerFixture {
 
     public void openView() {
         if (!isViewOpened()) {
+            if(UITestRunner.getIdeaVersion().toInt() > 20242) {
+                final ToolWindowRightToolbar toolWindowRightToolbar = find(ToolWindowRightToolbar.class);
+                toolWindowRightToolbar.clickStripeButton(GETTING_STARTED);
+            }
             final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
             toolWindowPane.button(byXpath(getToolWindowButton(GETTING_STARTED)), Duration.ofSeconds(2)).click();
             LOGGER.info("Getting Started view opened");
@@ -51,6 +58,10 @@ public class GettingStartedView extends ContainerFixture {
 
     public void closeView() {
         if (isViewOpened()) {
+            if(UITestRunner.getIdeaVersion().toInt() > 20242) {
+                final ToolWindowRightToolbar toolWindowRightToolbar = find(ToolWindowRightToolbar.class);
+                toolWindowRightToolbar.clickStripeButton(GETTING_STARTED);
+            }
             final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
             toolWindowPane.button(byXpath(getToolWindowButton(GETTING_STARTED)), Duration.ofSeconds(2)).click();
             LOGGER.info("Getting Started view closed");
