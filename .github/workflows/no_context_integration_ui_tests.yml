@@ -21,6 +21,15 @@ jobs:
           add-job-summary: 'on-failure'
           add-job-summary-as-pr-comment: 'on-failure'
           validate-wrappers: true
+      # TODO remove locally building common-ui-test-library after new release of common-ui-test-library
+      - name: 'Clone common-ui-test-library to Maven Local repository'
+        run: |
+          git clone --branch ghabranch https://github.com/martinszuc/intellij-common-ui-test-library.git ../common-ui-test-library
+      - uses: burrunan/gradle-cache-action@3bf23b8dd95e7d2bacf2470132454fe893a178a1 #v1
+        name: Build common-ui-test-library
+        with:
+          build-root-directory: ../common-ui-test-library
+          arguments: publishToMavenLocal
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Play integration UI tests
