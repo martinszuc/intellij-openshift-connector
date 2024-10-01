@@ -154,12 +154,6 @@ tasks {
         classpath = sourceSets.test.get().runtimeClasspath
         mainClass.set("org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock")
     }
-
-    register("copyKey", Copy::class.java) {
-        from("idea_license_token/idea.key")
-        into("build/idea-sandbox/config-uiTest")
-    }
-
 }
 
 sourceSets {
@@ -215,7 +209,6 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
 
 val integrationUITest by intellijPlatformTesting.testIde.registering {
     task {
-        dependsOn(tasks["copyKey"])
         systemProperty("com.redhat.devtools.intellij.telemetry.mode", "disabled")
         findProperty("tools.dl.path")?.let { systemProperty("tools.dl.path", it) }
         findProperty("testProjectLocation")?.let { systemProperty("testProjectLocation", it) }
@@ -267,6 +260,13 @@ val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
                 "-Djb.privacy.policy.text=<!--999.999-->",
                 "-Djb.consents.confirmation.enabled=false",
             )
+        }
+        doFirst {
+            val configDir = sandboxConfigDirectory.get().asFile
+            project.copy {
+                from("idea_license_token/idea.key")
+                into(configDir)
+            }
         }
     }
     plugins {
