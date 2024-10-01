@@ -13,7 +13,10 @@ package org.jboss.tools.intellij.openshift.test.ui.views;
 import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
+import com.redhat.devtools.intellij.commonuitest.UITestRunner;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowLeftToolbar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import org.jboss.tools.intellij.openshift.test.ui.runner.IdeaRunner;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +45,10 @@ public class OpenshiftView extends ContainerFixture {
 
     public void openView() {
         if (!isViewOpened()) {
+            if(UITestRunner.getIdeaVersion().toInt() > 20242) {
+                final ToolWindowLeftToolbar toolWindowLeftToolbar = find(ToolWindowLeftToolbar.class);
+                toolWindowLeftToolbar.clickStripeButton(OPENSHIFT);
+            }
             final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
             toolWindowPane.button(byXpath(getToolWindowButton(OPENSHIFT)), Duration.ofSeconds(2)).click();
             LOGGER.info("Openshift view opened");
@@ -50,6 +57,10 @@ public class OpenshiftView extends ContainerFixture {
 
     public void closeView() {
         if (isViewOpened()) {
+            if(UITestRunner.getIdeaVersion().toInt() > 20242) {
+                final ToolWindowLeftToolbar toolWindowLeftToolbar = find(ToolWindowLeftToolbar.class);
+                toolWindowLeftToolbar.clickStripeButton(OPENSHIFT);
+            }
             final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
             toolWindowPane.button(byXpath(getToolWindowButton(OPENSHIFT)), Duration.ofSeconds(2)).click();
             LOGGER.info("Openshift view closed");
@@ -88,8 +99,12 @@ public class OpenshiftView extends ContainerFixture {
 
     private boolean isViewOpened() {
         try {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.find(ComponentFixture.class, byXpath(OPENSHIFT_BASELABEL));
+            if (UITestRunner.getIdeaVersionInt() >= 20242) { // IntelliJ IDEA 2024.2 and newer
+                find(ComponentFixture.class, byXpath(OPENSHIFT_BASELABEL), Duration.ofSeconds(5));
+            } else {
+                ToolWindowPane toolWindowPane = find(ToolWindowPane.class, Duration.ofSeconds(5));
+                toolWindowPane.find(ComponentFixture.class, byXpath(OPENSHIFT_BASELABEL));
+            }
             LOGGER.info("Openshift view: View is already opened");
             return true;
         } catch (Exception ignored) {

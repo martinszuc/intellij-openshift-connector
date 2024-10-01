@@ -14,7 +14,10 @@ import com.intellij.remoterobot.RemoteRobot;
 import com.intellij.remoterobot.data.RemoteComponent;
 import com.intellij.remoterobot.fixtures.*;
 import com.intellij.remoterobot.utils.Keyboard;
+import com.redhat.devtools.intellij.commonuitest.UITestRunner;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowLeftToolbar;
 import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowPane;
+import com.redhat.devtools.intellij.commonuitest.fixtures.mainidewindow.toolwindowspane.ToolWindowRightToolbar;
 import org.jboss.tools.intellij.openshift.test.ui.utils.constants.XPathConstants;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -43,6 +46,10 @@ public class GettingStartedView extends ContainerFixture {
 
     public void openView() {
         if (!isViewOpened()) {
+            if(UITestRunner.getIdeaVersion().toInt() > 20242) {
+                final ToolWindowRightToolbar toolWindowRightToolbar = find(ToolWindowRightToolbar.class);
+                toolWindowRightToolbar.clickStripeButton(GETTING_STARTED);
+            }
             final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
             toolWindowPane.button(byXpath(getToolWindowButton(GETTING_STARTED)), Duration.ofSeconds(2)).click();
             LOGGER.info("Getting Started view opened");
@@ -51,6 +58,10 @@ public class GettingStartedView extends ContainerFixture {
 
     public void closeView() {
         if (isViewOpened()) {
+            if(UITestRunner.getIdeaVersion().toInt() > 20242) {
+                final ToolWindowRightToolbar toolWindowRightToolbar = find(ToolWindowRightToolbar.class);
+                toolWindowRightToolbar.clickStripeButton(GETTING_STARTED);
+            }
             final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
             toolWindowPane.button(byXpath(getToolWindowButton(GETTING_STARTED)), Duration.ofSeconds(2)).click();
             LOGGER.info("Getting Started view closed");
@@ -84,12 +95,19 @@ public class GettingStartedView extends ContainerFixture {
 
     private boolean isViewOpened() {
         try {
-            final ToolWindowPane toolWindowPane = find(ToolWindowPane.class);
-            toolWindowPane.find(ComponentFixture.class, byXpath(GETTING_STARTED_BASELABEL));
+            if (UITestRunner.getIdeaVersionInt() >= 20242) {
+                // For IntelliJ IDEA 2024.2 and newer
+                find(ComponentFixture.class, byXpath(GETTING_STARTED_BASELABEL), Duration.ofSeconds(5));
+            } else {
+                // For older versions
+                ToolWindowPane toolWindowPane = find(ToolWindowPane.class, Duration.ofSeconds(5));
+                toolWindowPane.find(ComponentFixture.class, byXpath(GETTING_STARTED_BASELABEL));
+            }
             LOGGER.info("Getting Started view: View is already opened");
             return true;
         } catch (Exception ignored) {
+            LOGGER.info("Getting Started view: View is not opened");
+            return false;
         }
-        return false;
     }
 }
