@@ -213,7 +213,7 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
 val integrationUITest by intellijPlatformTesting.testIde.registering {
     task {
         doFirst {
-            val configDir = sandboxConfigDirectory.get().asFile
+            val configDir = layout.buildDirectory.dir("idea-sandbox/config-uiTest").get().asFile
             project.copy {
                 from("idea_license_token/idea.key")
                 into(configDir)

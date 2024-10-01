@@ -58,20 +58,24 @@ public abstract class AbstractBaseTest {
     public static void setUpProject() {
 
         robot = IdeaRunner.getInstance().getRemoteRobot();
+        try{
+            if (!isProjectCreatedAndOpened) {
+                FlatWelcomeFrame flatWelcomeFrame = robot.find(FlatWelcomeFrame.class, Duration.ofSeconds(10));
+                flatWelcomeFrame.disableNotifications();
+                flatWelcomeFrame.preventTipDialogFromOpening();
 
-        if (!isProjectCreatedAndOpened) {
-            FlatWelcomeFrame flatWelcomeFrame = robot.find(FlatWelcomeFrame.class, Duration.ofSeconds(10));
-            flatWelcomeFrame.disableNotifications();
-            flatWelcomeFrame.preventTipDialogFromOpening();
+                CreateCloseUtils.createNewProject(robot, "test-project", CreateCloseUtils.NewProjectType.PLAIN_JAVA);
+                ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
+                ProjectUtility.closeGotItPopup(robot);
 
-            CreateCloseUtils.createNewProject(robot, "test-project", CreateCloseUtils.NewProjectType.PLAIN_JAVA);
-            ProjectStructureDialog.cancelProjectStructureDialogIfItAppears(robot);
-            ProjectUtility.closeGotItPopup(robot);
+                IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
+                ideStatusBar.waitUntilAllBgTasksFinish();
 
-            IdeStatusBar ideStatusBar = robot.find(IdeStatusBar.class, Duration.ofSeconds(5));
-            ideStatusBar.waitUntilAllBgTasksFinish();
-
-            isProjectCreatedAndOpened = true;
+                isProjectCreatedAndOpened = true;
+            }
+        } catch (Exception e) {
+            captureScreenshot("setupProjectFailed");
+            throw new RuntimeException(e);
         }
     }
 
