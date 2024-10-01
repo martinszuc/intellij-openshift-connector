@@ -51,8 +51,8 @@ public abstract class AbstractBaseTest {
     public static final String DEFAULT_CLUSTER_URL = "no (current) context/cluster set";
     protected static String currentClusterUrl = DEFAULT_CLUSTER_URL;
 
-    @RegisterExtension
-    TestWatcher testWatcher = new TestWatcherImpl();
+//    @RegisterExtension
+//    TestWatcher testWatcher = new TestWatcherImpl();
 
     @BeforeAll
     public static void setUpProject() {
@@ -151,11 +151,11 @@ public abstract class AbstractBaseTest {
             LOGGER.error("Failed to capture screenshot: {}", e.getMessage(), e);
         }
     }
-    private static class TestWatcherImpl implements TestWatcher {
-        @Override
-        public void testFailed(ExtensionContext context, Throwable cause) {
-            captureScreenshot("test_failed_" + context.getDisplayName());
-            CleanUpUtility.cleanUpAll(robot);
-        }
+//    private static class TestWatcherImpl implements TestWatcher {
+//        @Override
+//        public void testFailed(ExtensionContext context, Throwable cause) {
+//            captureScreenshot("test_failed_" + context.getDisplayName());
+//            CleanUpUtility.cleanUpAll(robot);
+//        }
     }
-}
+
