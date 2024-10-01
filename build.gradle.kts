@@ -1,5 +1,6 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 plugins {
     id("java") // Java support
@@ -154,13 +155,8 @@ tasks {
         classpath = sourceSets.test.get().runtimeClasspath
         mainClass.set("org.jboss.tools.intellij.openshift.ui.sandbox.SandboxRegistrationServerMock")
     }
-
-    register("copyKey", Copy::class.java) {
-        from("idea_license_token/idea.key")
-        into("build/idea-sandbox/config-uiTest")
-    }
-
 }
+
 
 sourceSets {
     create("it") {
@@ -197,6 +193,7 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
         shouldRunAfter(tasks["test"])
     }
 
+
     plugins {
         robotServerPlugin()
     }
@@ -215,7 +212,14 @@ val integrationTest by intellijPlatformTesting.testIde.registering {
 
 val integrationUITest by intellijPlatformTesting.testIde.registering {
     task {
-        dependsOn(tasks["copyKey"])
+        doFirst {
+            val configDir = sandboxConfigDirectory.get().asFile
+            project.copy {
+                from("idea_license_token/idea.key")
+                into(configDir)
+            }
+        }
+
         systemProperty("com.redhat.devtools.intellij.telemetry.mode", "disabled")
         findProperty("tools.dl.path")?.let { systemProperty("tools.dl.path", it) }
         findProperty("testProjectLocation")?.let { systemProperty("testProjectLocation", it) }
@@ -265,13 +269,13 @@ val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
                 "-Dide.mac.message.dialogs.as.sheets=false",
                 "-Djb.privacy.policy.text=<!--999.999-->",
                 "-Djb.consents.confirmation.enabled=false",
-                "-Djb.consents.confirmation.enabled", "false",
-                "-Djb.consents.confirmation.enabled", "false",
-                "-Dide.mac.file.chooser.native", "false",
-                "-DjbScreenMenuBar.enabled", "false",
-                "-Dapple.laf.useScreenMenuBar", "false",
-                "-Didea.trust.all.projects", "true",
-                "-Dide.show.tips.on.startup.default.value", "false"
+                "-Djb.consents.confirmation.enabled=false",
+                "-Djb.consents.confirmation.enabled=false",
+                "-Dide.mac.file.chooser.native=false",
+                "-DjbScreenMenuBar.enabled=false",
+                "-Dapple.laf.useScreenMenuBar=false",
+                "-Didea.trust.all.projects=true",
+                "-Dide.show.tips.on.startup.default.value=false"
             )
         }
     }
