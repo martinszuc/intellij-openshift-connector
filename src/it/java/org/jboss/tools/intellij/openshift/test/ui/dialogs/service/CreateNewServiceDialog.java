@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors: Martin Szuc
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.intellij.openshift.test.ui.dialogs.service;
 
 import com.intellij.remoterobot.RemoteRobot;
@@ -42,21 +52,21 @@ public class CreateNewServiceDialog extends CommonContainerFixture {
     }
 
     public void selectTemplateByText(String visibleText) {
-        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']")).get(0);
+        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX)).get(0);
         typeComboBox.click();
         JListFixture jListFixture = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jListFixture.clickItem(visibleText, false);
     }
 
     public void selectType(int index) {
-        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']")).get(1);
+        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX)).get(1);
         typeComboBox.click();
         JListFixture jListFixture = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jListFixture.clickItemAtIndex(index);
     }
 
     public void selectTypeByText(String visibleText) {
-        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath("//div[@class='JComboBox']")).get(1);
+        ComboBoxFixture typeComboBox = findAll(ComboBoxFixture.class, byXpath(XPathConstants.JCOMBOBOX)).get(1);
         typeComboBox.click();
         JListFixture jListFixture = find(JListFixture.class, byXpath(XPathConstants.JLIST));
         jListFixture.clickItem(visibleText, false);
