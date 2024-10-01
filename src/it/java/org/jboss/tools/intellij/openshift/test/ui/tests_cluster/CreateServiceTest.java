@@ -19,9 +19,8 @@ public class CreateServiceTest extends AbstractClusterTest {
     private static final String PROVIDER_NAME = "test-provider";
     private static final String PROJECT_NAME = "newtestproject";
 
-    //@Test
-    //@Order(1)
-    @Ignore
+    @Test
+    @Order(1)
     public void createServiceTest() {
         CreateNewServiceDialog createNewServiceDialog = CreateNewServiceDialog.open(robot);
         assertNotNull(createNewServiceDialog);
