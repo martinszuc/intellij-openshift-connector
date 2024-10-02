@@ -30,6 +30,8 @@ public class ChangeProjectDialog extends CommonContainerFixture {
         // Use RemoteRobot's Keyboard to type the project name
         Keyboard keyboard = new Keyboard(remoteRobot);
         keyboard.enterText(projectName);
+        keyboard.enter();
+
     }
 
     public void clickChange() {
