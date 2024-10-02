@@ -30,6 +30,9 @@ public class ChangeProjectDialog extends CommonContainerFixture {
         // Use RemoteRobot's Keyboard to type the project name
         Keyboard keyboard = new Keyboard(remoteRobot);
         keyboard.enterText(projectName);
+        if (isDropdownMenuOpened()) {
+            keyboard.enter();
+        }
     }
 
     public void clickChange() {
@@ -38,5 +41,14 @@ public class ChangeProjectDialog extends CommonContainerFixture {
 
     public void clickCancel() {
         find(ComponentFixture.class, byXpath(XPathConstants.BUTTON_CANCEL)).click();
+    }
+
+    private boolean isDropdownMenuOpened() {
+        try {
+            this.find(ComponentFixture.class, byXpath("//div[@class='HeavyWeightWindow']"));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 }
