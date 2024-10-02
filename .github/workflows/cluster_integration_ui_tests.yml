@@ -36,6 +36,15 @@ jobs:
       #      sleep 1
       #      nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
       #    done
+        # TODO remove locally building common-ui-test-library after new release of common-ui-test-library
+      - name: 'Clone common-ui-test-library to Maven Local repository'
+        run: |
+          git clone --branch ghabranch https://github.com/martinszuc/intellij-common-ui-test-library.git ../common-ui-test-library
+      - uses: burrunan/gradle-cache-action@3bf23b8dd95e7d2bacf2470132454fe893a178a1 #v1
+        name: Build common-ui-test-library
+        with:
+          build-root-directory: ../common-ui-test-library
+          arguments: publishToMavenLocal
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Play cluster integration UI tests
